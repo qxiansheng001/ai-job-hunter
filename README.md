@@ -19,10 +19,9 @@
 flowchart LR
     A[job-init<br/>画像初始化] --> B[job-scan<br/>岗位扫描]
     B --> C[job-analyze<br/>分析 & 学习计划]
-    C --> D[job-status<br/>日常陪跑]
 ```
 
-三步闭环：**了解你 → 找岗位 → 分析差距产出计划 → 每天跟着学**
+两步闭环：**了解你 → 找岗位 → 分析差距产出学习计划**
 
 ---
 
@@ -37,7 +36,6 @@ flowchart LR
 | **学习计划** | 30/60/90 天定制计划，含费曼学习法 + 第一性原理 |
 | **技能变现** | 技术内容创作与技能变现模块（可选，不挤占核心学习）|
 | **反诈检测** | 识别培训贷、包就业、付费内推等话术 |
-| **日常陪跑** | 每日打卡、任务跟踪、卡点诊断 |
 
 ---
 
@@ -97,7 +95,6 @@ Claude Code 会引导你依次完成：
 | `/job-init` | 首次使用自动触发 | 采集画像，判定 S0-S3 档位 |
 | `/job-scan` | "帮我找岗位" | 推荐岗位 → CDP 抓取 → 清洗导出 |
 | `/job-analyze` | 画像+扫描完成后自动可用 | JD 分析 → 差距分析 → 学习计划 |
-| `/job-status` | "今天该学什么" | 日常打卡、任务跟踪、卡点诊断 |
 
 ---
 
@@ -153,8 +150,7 @@ ai-job-hunter/
 ├── skills/
 │   ├── job-init/SKILL.md        画像初始化
 │   ├── job-scan/SKILL.md        岗位扫描
-│   ├── job-analyze/SKILL.md     分析 & 学习计划
-│   └── job-status/SKILL.md      日常陪跑
+│   └── job-analyze/SKILL.md     分析 & 学习计划
 │
 ├── shared-references/
 │   ├── role-tiers.md             起点档位判定
