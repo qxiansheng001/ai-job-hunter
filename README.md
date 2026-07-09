@@ -49,15 +49,61 @@ flowchart LR
 
 ### 两步启动
 
-```bash
-# 1. 克隆
+按你的平台操作：
+
+<details>
+<summary><b>Windows</b></summary>
+
+```powershell
+# 打开 PowerShell 或命令提示符，执行：
+
+# 1. 克隆仓库
 git clone https://github.com/qxiansheng001/ai-job-hunter.git
 cd ai-job-hunter
 
-# 2. 在 Claude Code 中打开此目录，输入：
-```
+# 2. 在 Claude Code 中打开此目录
+claude .
 
+# 然后在 Claude Code 中输入：
+```
 > "开始求职"
+</details>
+
+<details>
+<summary><b>macOS</b></summary>
+
+```bash
+# 打开终端（Terminal），执行：
+
+# 1. 克隆仓库
+git clone https://github.com/qxiansheng001/ai-job-hunter.git
+cd ai-job-hunter
+
+# 2. 在 Claude Code 中打开此目录
+claude .
+
+# 然后在 Claude Code 中输入：
+```
+> "开始求职"
+</details>
+
+<details>
+<summary><b>Linux</b></summary>
+
+```bash
+# 打开终端，执行：
+
+# 1. 克隆仓库
+git clone https://github.com/qxiansheng001/ai-job-hunter.git
+cd ai-job-hunter
+
+# 2. 在 Claude Code 中打开此目录
+claude .
+
+# 然后在 Claude Code 中输入：
+```
+> "开始求职"
+</details>
 
 ### 之后会发生什么
 
