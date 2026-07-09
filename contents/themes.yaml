@@ -972,3 +972,423 @@ THEME_POOL:
       - level: L2
         style: practical
         prereq: basic
+
+  Python 基础编程:
+    goal: 掌握 Python 核心语法和编程基础，能独立写脚本解决实际问题
+    items:
+    - - 编程思维入门：变量、数据类型、条件判断
+      - 编程就像做菜：变量=食材，条件判断=按菜谱决定下一步
+      - 写一个小程序：根据用户输入判断是成人还是未成年人
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 循环与列表
+      - 循环=流水线，列表=传送带上的物品
+      - 用 for 循环处理全班同学的成绩单，计算平均分和最高分
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 函数与模块化
+      - 函数=厨房里的专用工具，每个工具做一件事
+      - 把计算器功能拆成多个函数：输入/计算/输出
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 字符串与文件操作
+      - 文件=笔记本，程序能读写笔记本上的内容
+      - 写一个日志分析脚本：读取文件、统计关键词出现次数
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 字典与集合
+      - 字典=通讯录，集合=去重神器
+      - 用字典统计一篇文章中每个单词出现的频率
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 异常处理与调试
+      - 异常=路上有坑，try/except=绕路走或修路
+      - 为一个计算器程序添加完整的异常处理
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 面向对象编程基础
+      - 类=设计图，对象=按设计图造出来的实物
+      - 用类设计一个「学生管理系统」：学生有姓名/成绩/方法
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 综合实战：命令行工具
+      - 把所学知识串起来，写一个真正能用的工具
+      - 独立完成一个待办事项管理器的命令行工具（增删改查+文件持久化）
+      - 2.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+
+  数据结构与算法:
+    goal: 掌握核心数据结构和常用算法，能分析时间空间复杂度
+    items:
+    - - 时间复杂度与空间复杂度
+      - 复杂度=你选哪条路回家：大路远但快 vs 小路近但堵
+      - 分析 3 段不同代码的时间复杂度（O(1)/O(n)/O(n²)）
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - 数组与链表
+      - 数组=电影院连座，链表=游击队员手拉手
+      - 用 Python 实现单向链表的基本操作（增删查）
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 栈与队列
+      - 栈=叠盘子后进先出，队列=排队先进先出
+      - 用栈实现括号匹配检查，用队列实现打印任务调度
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 哈希表
+      - 哈希表=图书馆的索引卡，输入书名直接定位到书架
+      - 用字典实现一个 LRU 缓存
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 排序算法
+      - 排序=整理扑克牌，不同方法各有优劣
+      - 实现快排和归并排序，对比它们的性能差异
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 树与二叉树
+      - 树=公司的组织架构，每个节点都有上下级
+      - 实现二叉树的三种遍历方式（前序/中序/后序）
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 图与搜索（BFS/DFS）
+      - 图=地铁线路图，BFS=逐层扩散，DFS=一条路走到黑
+      - 用 BFS 求最短路径，用 DFS 判断图是否有环
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: intermediate
+    - - 动态规划入门
+      - DP=记住已算过的结果，避免重复劳动
+      - 用 DP 解决背包问题和最长公共子序列
+      - 2.5
+      - level: L3
+        style: technical
+        prereq: intermediate
+
+  数据库与 SQL:
+    goal: 掌握 SQL 核心语法和数据库设计基础，能独立完成数据查询与分析
+    items:
+    - - 数据库基本概念
+      - 数据库=带抽屉的档案柜，表=一个抽屉
+      - 设计一个简单的图书管理系统的 ER 图
+      - 1.0
+      - level: L1
+        style: writing
+        prereq: none
+    - - SELECT 查询基础
+      - SELECT=从档案柜里挑出你想要的文件
+      - 在员工表上练习 SELECT / WHERE / ORDER BY
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 聚合函数与分组
+      - GROUP BY=把相同颜色的积木放在一起数一数
+      - 用 GROUP BY + COUNT/AVG/SUM 做销售数据统计分析
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 表关联 JOIN
+      - JOIN=两张表像拼图一样拼在一起
+      - 用 INNER JOIN / LEFT JOIN 查询订单+用户+商品三表关联
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 子查询与 CTE
+      - 子查询=查询里套查询，CTE=给复杂查询起个名字分段写
+      - 用 CTE 重写一个多层嵌套的复杂查询
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 索引与查询优化
+      - 索引=书的目录，让你不用翻完整本书找内容
+      - 用 EXPLAIN 分析慢查询，添加合适的索引优化
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 数据库设计范式
+      - 范式=避免数据冗余的设计规范
+      - 将一个不规范的表拆分为符合第三范式的多张表
+      - 2.0
+      - level: L3
+        style: analytical
+        prereq: intermediate
+    - - 事务与并发控制
+      - 事务=银行转账：要么全做完，要么全不做
+      - 模拟并发转账场景，用事务保证数据一致性
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: intermediate
+
+  PyTorch 框架实战:
+    goal: 掌握 PyTorch 核心 API，能独立完成模型训练、评估和部署
+    items:
+    - - PyTorch 基础：张量与自动求导
+      - 张量=带 GPU 加速的多维数组，自动求导=自动算梯度
+      - 用 PyTorch 创建张量，实现一个简单的线性回归自动求导
+      - 1.5
+      - level: L1
+        style: technical
+        prereq: none
+    - - 数据加载与预处理
+      - DataLoader=给模型喂食的自动投喂器
+      - 用 Dataset + DataLoader 加载图片数据集并做数据增强
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 神经网络构建（nn.Module）
+      - nn.Module=搭积木，每层网络是一块积木
+      - 用 nn.Module 搭建一个三层全连接分类网络
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 训练循环与优化器
+      - 训练=健身：前向=举铁，反向=知道哪里酸，优化=调整姿势
+      - 手写完整的训练循环（前向/损失/反向/优化器）
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - CNN 与卷积网络
+      - 卷积=用放大镜扫描图片提取特征
+      - 用 torchvision 实现一个简单的图像分类器（CIFAR-10）
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - Transformer 与注意力机制
+      - 注意力=聚光灯，模型学会在输入序列中找到关键信息
+      - 用 PyTorch 实现一个简化版 Multi-Head Attention
+      - 2.5
+      - level: L3
+        style: technical
+        prereq: intermediate
+    - - 模型保存、加载与迁移学习
+      - 迁移学习=搭便车，用别人训练好的模型省时间
+      - 用 torchvision 预训练模型做迁移学习（修复分类器头）
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - 分布式训练与混合精度
+      - 分布式=人多力量大，混合精度=用小算盘做大数计算
+      - 用 DDP 实现多 GPU 训练，对比单卡和多卡性能差异
+      - 2.5
+      - level: L3
+        style: technical
+        prereq: intermediate
+
+  AI 通识入门:
+    goal: 建立 AI 全景认知，理解核心概念和应用场景
+    items:
+    - - 人工智能发展简史
+      - AI 的发展像人的成长：从爬行（规则系统）到走路（机器学习）到跑步（深度学习）
+      - 整理 AI 发展时间线，标出 3 个关键里程碑和它们的影响
+      - 1.0
+      - level: L1
+        style: writing
+        prereq: none
+    - - 机器学习核心概念
+      - 机器学习=教电脑从例子中总结规律，而不是给规则
+      - 用生活中的例子解释监督/无监督/强化学习的区别
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 深度学习与神经网络
+      - 神经网络=模仿大脑的简化版：神经元=一个简单计算器
+      - 用手画一张神经网络示意图，标注输入层/隐藏层/输出层
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 大模型与生成式 AI
+      - 大模型=读过整个互联网的学霸，生成=根据上下文接龙
+      - 对比 3 个大模型（GPT/Claude/Gemini）的能力差异和适用场景
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - AI 在行业中的应用
+      - AI 不是万能药，选对场景才能发挥作用
+      - 选择 3 个行业（医疗/金融/教育），分析 AI 落地的具体案例
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - AIGC 工具入门
+      - AIGC 工具=你的 AI 助手团队：有写文案的、画图的、做视频的
+      - 用 ChatGPT 生成文案 + 用 AI 绘图工具做配图 + 用 AI 做PPT
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - AI 伦理与社会影响
+      - AI 是工具，用好了是手术刀，用歪了是伤人利器
+      - 分析 2 个 AI 伦理案例（偏见/隐私/就业影响），写出你的观点
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - AI 学习路线规划
+      - 学 AI 不是登山，是建房子：先打地基再盖楼
+      - 根据自己的背景制定一份个性化的 AI 学习路线图
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+
+  数据分析与可视化:
+    goal: 掌握数据分析全流程：数据获取、清洗、分析、可视化、报告
+    items:
+    - - 数据分析思维与流程
+      - 数据分析=侦探破案：先有问题假设，再找证据验证
+      - 对一个电商数据集提出 3 个业务问题并拟定分析思路
+      - 1.0
+      - level: L1
+        style: analytical
+        prereq: none
+    - - pandas 基础：数据加载与预览
+      - DataFrame=加强版 Excel 表格，能处理百万行数据
+      - 用 pandas 读取 CSV 文件，做基本的数据预览和信息统计
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 数据清洗
+      - 数据清洗=洗菜，脏数据=泥土，不洗不能下锅
+      - 处理缺失值、重复值、异常值，转换数据类型
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 数据分组与聚合
+      - groupby=把数据按标签分堆，每堆再算统计量
+      - 用 groupby + agg 做用户分层分析（RFM 模型）
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Matplotlib 与 Seaborn 可视化
+      - 可视化=一图胜千言，好的图表自己会说话
+      - 用 seaborn 绘制相关性热力图、箱线图、趋势折线图
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 探索性数据分析（EDA）
+      - EDA=像医生做体检一样全面检查数据
+      - 对一个真实数据集做完整 EDA，输出分析报告
+      - 2.0
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 数据报告与故事化呈现
+      - 数据报告不是堆数字，是用数据讲一个让人信服的故事
+      - 将 EDA 结果整理为一份完整的数据分析报告（含可视化）
+      - 2.0
+      - level: L3
+        style: analytical
+        prereq: intermediate
+    - - 综合实战：电商数据分析
+      - 把全套技能串起来解决一个真实业务问题
+      - 从数据清洗到可视化报告完整走一遍电商数据分析项目
+      - 2.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+
+  Linux 与命令行:
+    goal: 掌握 Linux 常用命令和 Shell 编程，能独立在服务器上完成开发部署
+    items:
+    - - Linux 基础概念与文件系统
+      - Linux 的文件系统=一棵倒长的树，/是根目录
+      - 用 ls/cd/pwd/mkdir 在终端中浏览和创建目录结构
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 文件操作命令
+      - 命令行操作文件=用遥控器而不是用手去按电视按钮
+      - 用 cp/mv/rm/touch/cat/less 完成文件批量操作
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 权限与用户管理
+      - 权限=门禁卡，r=能看，w=能改，x=能进
+      - 用 chmod/chown 设置文件和目录权限
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 管道、重定向与文本处理
+      - 管道=|，把前一个命令的输出变成后一个命令的输入
+      - 用 grep/sed/awk 组合命令分析日志文件
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 进程管理与系统监控
+      - 进程=运行中的程序，top=看谁在吃CPU
+      - 用 ps/top/kill 管理进程，用 systemctl 管理服务
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Shell 脚本编程
+      - Shell 脚本=把一堆命令写进一个文件，一键执行
+      - 写一个自动部署脚本：拉代码→装依赖→重启服务
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 网络基础与远程连接
+      - SSH=远程桌面，只不过全是命令行
+      - 配置 SSH 免密登录，用 scp/rsync 同步文件
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Docker 容器化基础
+      - Docker 容器=轻量级虚拟机，像打包行李一样打包应用
+      - 写 Dockerfile 打包一个 Python Web 应用并运行
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: intermediate

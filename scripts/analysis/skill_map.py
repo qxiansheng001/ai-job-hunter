@@ -45,6 +45,22 @@ SKILL_RESOURCES = _content.get("SKILL_RESOURCES") or {
         "Rasa 官方文档", "对话系统设计模式"]},
     "GitHub": {"type": "工具", "priority": "了解", "resources": [
         "GitHub 官方文档", "GitHub Flow 指南"]},
+    "Python基础": {"type": "语言", "priority": "必修", "resources": [
+        "《Python编程从入门到实践》", "Python官方Tutorial docs.python.org"]},
+    "数据结构": {"type": "基础", "priority": "必修", "resources": [
+        "《剑指Offer》", "LeetCode 热题100"]},
+    "算法": {"type": "基础", "priority": "必修", "resources": ["LeetCode", "《算法导论》精选章节"]},
+    "SQL": {"type": "技术", "priority": "必修", "resources": [
+        "SQLZoo 在线练习", "《SQL必知必会》"]},
+    "数据库": {"type": "技术", "priority": "必修", "resources": ["同上 SQL"]},
+    "PyTorch": {"type": "框架", "priority": "必修", "resources": [
+        "PyTorch 官方教程 pytorch.org/tutorials", "d2l.ai 李沐动手学深度学习"]},
+    "AI基础": {"type": "基础", "priority": "必修", "resources": [
+        "吴恩达《AI For Everyone》", "李开复《AI·未来》"]},
+    "数据分析": {"type": "技术", "priority": "必修", "resources": [
+        "《利用Python进行数据分析》", "Kaggle Learn 数据分析微课程"]},
+    "Linux": {"type": "工具", "priority": "选学", "resources": [
+        "《鸟哥的Linux私房菜》基础篇", "missing.csail.mit.edu"]},
 }
 
 # 技能名称 → WEEKLY_PLANS 中对应 theme 的映射
@@ -73,6 +89,27 @@ SKILL_TO_THEME = _content.get("SKILL_TO_THEME") or {
     "TypeScript": "TypeScript",
     "C++": "C++ 基础",
     "微服务": "微服务架构",
+    "Python基础": "Python 基础编程",
+    "编程基础": "Python 基础编程",
+    "Python入门": "Python 基础编程",
+    "数据结构": "数据结构与算法",
+    "算法": "数据结构与算法",
+    "LeetCode": "数据结构与算法",
+    "SQL": "数据库与 SQL",
+    "MySQL": "数据库与 SQL",
+    "数据库": "数据库与 SQL",
+    "PostgreSQL": "数据库与 SQL",
+    "PyTorch": "PyTorch 框架实战",
+    "PyTorch框架": "PyTorch 框架实战",
+    "AI基础": "AI 通识入门",
+    "人工智能基础": "AI 通识入门",
+    "AI概念": "AI 通识入门",
+    "数据分析": "数据分析与可视化",
+    "数据可视化": "数据分析与可视化",
+    "pandas": "数据分析与可视化",
+    "Linux": "Linux 与命令行",
+    "Shell": "Linux 与命令行",
+    "命令行": "Linux 与命令行",
 }
 
 THEME_TO_SKILL = _content.get("THEME_TO_SKILL") or {v: k for k, v in SKILL_TO_THEME.items()}
@@ -86,6 +123,13 @@ WEEK_PHASE_MAP = _content.get("WEEK_PHASE_MAP") or {
     "Kubernetes": 2, "微服务架构": 2,
     "Agent 系统架构设计": 3, "生产级部署": 3, "项目打磨与作品集": 3,
     "Agent 全流程实战": 2,
+    "Python 基础编程": 1,
+    "数据结构与算法": 2,
+    "数据库与 SQL": 1,
+    "PyTorch 框架实战": 2,
+    "AI 通识入门": 1,
+    "数据分析与可视化": 2,
+    "Linux 与命令行": 1,
 }
 
 # 技能 → 难度等级映射
@@ -100,6 +144,15 @@ SKILL_DIFFICULTY = {
     "GPT": "fundamental", "Llama": "fundamental",
     "GitHub": "fundamental", "TypeScript": "fundamental", "C++": "advanced",
     "微服务": "advanced",
+    "Python基础": "fundamental",
+    "数据结构": "fundamental",
+    "算法": "advanced",
+    "SQL": "fundamental",
+    "数据库": "fundamental",
+    "PyTorch": "advanced",
+    "AI基础": "fundamental",
+    "数据分析": "fundamental",
+    "Linux": "fundamental",
 }
 
 # ── 前置依赖映射 ──
@@ -121,6 +174,13 @@ THEME_PREREQUISITES = _content.get("THEME_PREREQUISITES") or {
     "LLM 与大模型基础": [],
     "Git 与版本控制": [],
     "微服务架构": ["生产级部署"],
+    "Python 基础编程": [],
+    "数据结构与算法": ["Python 基础编程"],
+    "数据库与 SQL": [],
+    "PyTorch 框架实战": ["Python 高级特性", "LLM 与大模型基础"],
+    "AI 通识入门": [],
+    "数据分析与可视化": ["Python 基础编程"],
+    "Linux 与命令行": [],
 }
 
 # ── 持续时间内置项目/开源数量映射 ──
@@ -243,6 +303,13 @@ CONTENT_MAPPING = _content.get("CONTENT_MAPPING") or {
     "对话系统": {"title": "对话系统设计：意图识别与状态管理", "type": "技术教程"},
     "Git 与版本控制": {"title": "Git 与 GitHub 协作实践指南", "type": "实操指南"},
     "微服务架构": {"title": "微服务架构：从单体到服务拆分", "type": "深度分析"},
+    "Python 基础编程": {"title": "Python 零基础入门：从安装到写第一个脚本", "type": "实操指南"},
+    "数据结构与算法": {"title": "面试必备：数据结构与算法核心 20 讲", "type": "学习笔记"},
+    "数据库与 SQL": {"title": "SQL 从入门到进阶：数据库查询与设计实战", "type": "技术教程"},
+    "PyTorch 框架实战": {"title": "PyTorch 实战：从张量到模型部署完整教程", "type": "技术教程"},
+    "AI 通识入门": {"title": "AI 通识课：零基础读懂人工智能", "type": "学习笔记"},
+    "数据分析与可视化": {"title": "数据分析师入门：Python 数据分析完整工作流", "type": "技术教程"},
+    "Linux 与命令行": {"title": "Linux 命令行实战：开发者必会的 20 个命令", "type": "实操指南"},
 }
 
 PROJECT_CONTENT = _content.get("PROJECT_CONTENT") or {
