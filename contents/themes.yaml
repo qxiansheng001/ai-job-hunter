@@ -1,0 +1,974 @@
+THEME_POOL:
+  LLM 与大模型基础:
+    goal: 理解大模型原理与发展脉络，打下 AI 基础
+    items:
+    - - 大模型发展简史与核心概念
+      - 用「从算盘到超级计算机」类比模型能力的跃迁
+      - 整理 LLM 发展时间线，标注关键里程碑
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 大模型能做什么：文本生成、问答、翻译
+      - 大模型就像「什么话题都能聊的学霸同学」
+      - 用 3 个不同场景测试大模型的能力边界
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - Transformer 架构原理
+      - 用「注意力=聚光灯」解释 Attention 机制
+      - 用 PyTorch 实现一个简化版 Attention 层
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 大模型的训练与推理基础
+      - 用「训练=上学，推理=考试」类比训练和推理
+      - 用 HuggingFace 加载预训练模型并完成推理
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 开源模型与闭源模型的选型分析
+      - 类比「选手机：iPhone vs 安卓」的生态对比
+      - 对比 3 个主流大模型（GPT/Llama/Claude）的能力与成本
+      - 2.0
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 大模型的伦理与安全
+      - 大模型是一把双刃剑，知道风险才能用好
+      - 分析 2 个 AI 伦理案例并提出改进思路
+      - 1.5
+      - level: L3
+        style: analytical
+        prereq: intermediate
+  Prompt 工程:
+    goal: 掌握 Prompt 设计原则和高级技巧，能写出高质量 Prompt
+    items:
+    - - Prompt 基础结构与设计原则
+      - 用「给实习生写任务说明」类比写 Prompt
+      - 为 3 个常见任务编写不同风格的 Prompt 对比效果
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - Prompt 在非技术场景的应用
+      - 用「写微博文案」类比 Prompt 的本质
+      - 为 3 个生活场景（写请假条/做旅行计划/说服朋友）各写一个 Prompt
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 高级 Prompt 技术：Few-shot 与 CoT
+      - Few-shot=给例题，CoT=写解题步骤
+      - 用 CoT Prompt 解决一个多步推理问题
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - Prompt 在实际应用中的调优
+      - 像调试代码一样调试你的 Prompt
+      - 迭代优化同一任务的 Prompt 直到达到理想效果
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - Prompt 评估与迭代方法论
+      - 用 A/B 测试的思路评估 Prompt 质量
+      - 设计 3 个评估指标，对同一任务的不同 Prompt 做对比实验
+      - 2.0
+      - level: L3
+        style: analytical
+        prereq: intermediate
+    - - Prompt 在产品设计中的应用
+      - Prompt 也是产品功能的一部分
+      - 分析 2 个实际产品的 Prompt 设计，写出改进方案
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+  RAG 与向量数据库:
+    goal: 掌握 RAG 架构设计与向量检索技术
+    items:
+    - - RAG 架构与核心流程
+      - 用「开卷考试先查资料再作答」类比 RAG
+      - 画出 RAG 完整数据流图
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 向量数据库与嵌入
+      - 用「给每段文字贴标签编入索引」类比向量化
+      - 用 ChromaDB 搭建一个简单向量检索
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 检索质量优化与实践
+      - 用「搜索引擎排序」类比检索排序
+      - 对比不同分块策略对检索效果的影响
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - RAG 应用场景分析
+      - 不是所有问题都适合用 RAG 解决
+      - 分析 3 个场景判断是否适合用 RAG，说明理由
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - RAG 的进阶：Graph RAG 与多轮检索
+      - 从「查一次资料」到「追问式查资料」
+      - 调研 Graph RAG 原理并画出示意图
+      - 2.0
+      - level: L3
+        style: analytical
+        prereq: advanced
+  LangChain 核心组件:
+    goal: 掌握 LangChain 四大核心组件的使用
+    items:
+    - - Chain 与 Pipeline 构建
+      - 用「工厂流水线」类比 Chain
+      - 搭建一个由 3 个 Chain 组成的处理管线
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Memory 机制
+      - 用「便利贴 vs 笔记本」类比短期 vs 长期记忆
+      - 实现一个带对话记忆的 Chatbot
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Retriever 与 Tool 集成
+      - 用「工具箱」类比 Tool 系统
+      - 集成 Wikipedia 和 Calculator 工具到 Chain
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - LangChain 入门：框架能解决什么问题
+      - LangChain 就像 AI 开发的「脚手架」
+      - 对比用/不用 LangChain 实现同一功能的代码差异
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 自定义 Chain 与高级组件编排
+      - 像搭积木一样组合自定义模块
+      - 设计一个自定义 Chain 完成多步骤文本处理
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
+  LangGraph 基础:
+    goal: 理解状态图和 Agent 工作流的基础
+    items:
+    - - 状态图与 Agent 工作流
+      - 用「流程图变程序」类比状态图
+      - 用 LangGraph 画一个简单的状态转移图
+      - 1.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - LangGraph 节点与边
+      - 用「有向图的节点连接」类比
+      - 实现一个包含条件分支的简单工作流
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 从流程图理解工作流
+      - 先画图再写代码，理清逻辑关系
+      - 用流程图画出 Agent 的工作路径，再转为代码
+      - 1.0
+      - level: L1
+        style: writing
+        prereq: none
+  Agent 全流程实战:
+    goal: 掌握 Agent 架构设计和工具调用完整实践
+    items:
+    - - Agent 架构与工具调用
+      - 用「人类用工具解决问题」类比 Agent 使用 Tool
+      - 搭建一个能调用搜索和计算工具的 Agent
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - Function Calling 深度实践
+      - 把函数签名变成模型能理解的「说明书」
+      - 自定义 3 个工具函数并让 Agent 自动调度
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 多步推理与 Agent 监控
+      - Agent 像侦探一步步收集线索得出结论
+      - 让 Agent 完成一个需要多步推理的复杂任务
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - Agent 的角色与边界
+      - 不是所有任务都需要 Agent，简单任务用 Chain 就够了
+      - 列出 3 个适合 Agent 和 3 个不适合 Agent 的任务场景
+      - 1.0
+      - level: L1
+        style: analytical
+        prereq: none
+    - - Agent 在生产环境中的可靠性设计
+      - Agent 的输出不可控，需要设计护栏
+      - 为 Agent 添加输出校验和异常重试机制
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
+  Function Calling 与工具调用:
+    goal: 掌握 Function Calling 原理和工具调度
+    items:
+    - - Function Calling 原理
+      - 模型不说答案，说「该调用哪个函数」
+      - 用 OpenAI API 实现一个函数调用示例
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 工具定义与参数绑定
+      - 把工具说明书翻译成模型能懂的 JSON Schema
+      - 为 3 个 API 定义完整的 Function Calling Schema
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 动态工具调度
+      - 让模型自己决定用什么工具解决什么任务
+      - 实现一个自动选择工具的 Router Agent
+      - 1.5
+      - level: L3
+        style: technical
+        prereq: intermediate
+  Agent 记忆与长期记忆:
+    goal: 理解 Agent 记忆机制和持久化方案
+    items:
+    - - 记忆类型与存储机制
+      - 区分「工作记忆」和「长期记忆」
+      - 实现一个基于文件的对话历史持久化
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 记忆检索与 Agent 结合
+      - 让 Agent 拥有「回忆过去」的能力
+      - 给 Agent 添加记忆检索增强
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  对话系统:
+    goal: 理解对话系统架构和意图识别方法
+    items:
+    - - 对话系统基础与架构
+      - 用「客服接线员」类比对话系统
+      - 设计一个简单对话系统的状态流转图
+      - 1.0
+      - level: L1
+        style: writing
+        prereq: none
+    - - 意图识别与对话管理
+      - 先猜用户想做什么，再决定怎么回
+      - 用规则或 LLM 实现一个简单的意图分类器
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  Python 高级特性:
+    goal: 掌握 Python 进阶特性提升编码能力
+    items:
+    - - 装饰器与上下文管理器
+      - 用「给函数穿外套」类比装饰器
+      - 实现一个带参数的计时装饰器
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 异步编程：asyncio 入门
+      - 用「等水开的时候去洗菜」类比异步
+      - 用 asyncio 改写同步 I/O 代码
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 生成器与迭代器模式
+      - 用「按需生产 vs 全部做好」类比
+      - 实现一个惰性求值的文件行读取器
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - Python 基础巩固：面向对象与模块化
+      - 把代码组织好，就像整理房间
+      - 将一个脚本重构为模块化包结构
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+  微调:
+    goal: 理解微调原理和 LoRA 实践
+    items:
+    - - 微调基础概念与 PEFT
+      - 用「在通才基础上专精」类比微调
+      - 理解 PEFT/LoRA 的基本原理并画出示意图
+      - 1.0
+      - level: L2
+        style: writing
+        prereq: basic
+    - - LoRA 微调实践
+      - 只修改一小部分参数 = 微调的精髓
+      - 用 HuggingFace PEFT 对一个小模型做 LoRA 微调
+      - 1.0
+      - level: L3
+        style: practical
+        prereq: advanced
+  生产级部署:
+    goal: 掌握 Docker 和 API 部署的基本技能
+    items:
+    - - Docker 基础与容器化
+      - 用「打包行李」类比 Docker 镜像
+      - 写 Dockerfile 打包一个 Python 应用
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - API 服务搭建
+      - 像开一个对外窗口提供你的服务
+      - 用 FastAPI 为模型搭建 REST API
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 部署上线与维护
+      - 像装修完房子还要定期维护
+      - 将应用部署到免费云平台并配置健康检查
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - AI 产品部署的特殊考量
+      - AI 产品部署和普通 Web 应用有什么不同
+      - 分析 AI 应用部署的延迟/成本/扩展性三大挑战
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+  Git 与版本控制:
+    goal: 掌握 Git 核心操作和团队协作流程
+    items:
+    - - Git 核心概念与工作流
+      - 用「游戏存档」类比版本控制
+      - 在本地仓库完成完整的 Git 工作流操作
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 分支策略与团队协作
+      - 用「多人写同一份文档」类比
+      - 模拟多人协作场景解决合并冲突
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  Multi-Agent 协作:
+    goal: 掌握多 Agent 通信与协作架构
+    items:
+    - - 多 Agent 架构模式
+      - 用「一个项目组」类比多 Agent
+      - 阅读 AutoGPT/MetaGPT 架构对比不同模式
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 任务分解与分配
+      - 像 PM 拆分任务给不同组员
+      - 实现 Supervisor 分配任务给 Worker Agent
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: advanced
+    - - 结果聚合与通信
+      - 各组员汇报结果给组长汇总
+      - 实现多 Agent 结果投票/加权聚合
+      - 1.5
+      - level: L3
+        style: technical
+        prereq: advanced
+  Agent 系统架构设计:
+    goal: 掌握生产级 Agent 系统的架构设计
+    items:
+    - - 系统架构设计原则
+      - 好架构让改需求不痛苦
+      - 完整画出 Agent 系统架构图
+      - 1.5
+      - level: L3
+        style: writing
+        prereq: advanced
+    - - 可扩展 Agent 框架设计
+      - 像乐高积木一样可插拔
+      - 设计支持动态添加工具的 Agent 框架
+      - 1.5
+      - level: L3
+        style: technical
+        prereq: advanced
+    - - 性能与安全优化
+      - 跑得快也要跑得稳
+      - 给 Agent 添加缓存和权限控制
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: advanced
+  项目打磨与作品集:
+    goal: 将项目完善为可展示的作品
+    items:
+    - - 项目复盘与重构
+      - 如果重来一次哪里可以做得更好
+      - 选择一个项目做重构，列出改进清单
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 文档与演示准备
+      - 好项目要让别人一眼看懂
+      - 写完整 README 并录制演示 Demo
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 作品集整理与展示
+      - 用 3 句话讲清楚每个项目的核心亮点
+      - 整理 2-3 个项目到简历/作品集
+      - 1.5
+      - level: L2
+        style: writing
+        prereq: basic
+  NLP:
+    goal: 理解 NLP 基础任务和模型应用
+    items:
+    - - NLP 基础任务概述
+      - 让计算机理解人类语言的各个层次
+      - 用 HuggingFace 完成文本分类和 NER
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 序列到序列模型
+      - 把一种序列变成另一种序列
+      - 用预训练模型完成文本摘要任务
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  微服务架构:
+    goal: 理解微服务设计原则和服务间通信
+    items:
+    - - 微服务设计原则
+      - 用「一个团队各司其职」类比微服务拆分
+      - 将单体应用拆分为微服务架构设计
+      - 1.0
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 服务间通信
+      - 不同微服务像不同部门之间传递文件
+      - 用 REST 实现两个微服务的通信
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  Kubernetes:
+    goal: 理解 K8s 核心概念和基础编排
+    items:
+    - - K8s 核心概念与架构
+      - 用「酒店管理」类比 K8s 管理容器
+      - 理解 Pod/Service/Deployment 的概念关系
+      - 1.0
+      - level: L1
+        style: writing
+        prereq: none
+    - - K8s 资源编排
+      - 像写菜单一样描述你想要的系统状态
+      - 写一个简单的 Deployment YAML 并部署
+      - 1.0
+      - level: L2
+        style: practical
+        prereq: basic
+  Java:
+    goal: 掌握 Java 核心语法和面向对象编程基础
+    items:
+    - - Java 基础语法与面向对象
+      - Java 的「万物皆对象」就像现实世界的东西都可以归类
+      - 用类/继承/接口实现一个简单的图书管理系统
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - Java 集合框架与泛型
+      - 集合就像不同规格的收纳盒，选对盒子事半功倍
+      - 对比 ArrayList/LinkedList/HashMap 的性能差异并选型
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 多线程与并发编程
+      - 多线程就像多个厨师同时做菜，需要协调避免冲突
+      - 用线程池/锁/CompletableFuture 实现并发数据处理
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: basic
+  Go:
+    goal: 掌握 Go 语言核心特性和并发编程模型
+    items:
+    - - Go 基础语法与类型系统
+      - Go 的简洁语法就像用圆珠笔写字，不能涂改但很清晰
+      - 实现一个 REST API 的 CRUD 接口熟悉 Go 语法
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - Goroutine 与 Channel
+      - goroutine=轻量级工人，channel=工人之间的传话管道
+      - 用 goroutine + channel 实现一个并发任务调度器
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - Go 接口与错误处理
+      - Go 的接口是隐式实现，让代码更灵活
+      - 用 interface 实现可扩展的插件式架构
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+  TypeScript:
+    goal: 掌握 TypeScript 类型系统和前端工程化基础
+    items:
+    - - TypeScript 类型系统入门
+      - 给 JavaScript 加上类型，就像给包裹贴上标签
+      - 将一段 JavaScript 代码迁移为 TypeScript
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 接口、泛型与高级类型
+      - 泛型就像「可调节大小的容器」，什么类型都能装
+      - 用泛型实现一个类型安全的事件发射器
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - TypeScript 在项目中的应用
+      - 类型定义就是最好的文档
+      - 为一个已有项目编写完整的类型声明文件
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+  C++ 基础:
+    goal: 理解 C++ 核心概念：指针、内存管理、面向对象
+    items:
+    - - C++ 基础语法与指针
+      - 指针就像门牌号，知道地址才能找到东西
+      - 用指针/引用/动态内存实现一个简单的链表
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 面向对象与 STL 容器
+      - STL 就像 C++ 的标准工具箱，不用自己造轮子
+      - 用 vector/map/algorithm 解决一个数据处理问题
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 移动语义与现代 C++
+      - 移动语义像「转交」而不是「复印」，效率更高
+      - 对比拷贝构造/移动构造/完美转发的性能差异
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+  计算机视觉:
+    goal: 掌握计算机视觉核心任务和模型部署
+    items:
+    - - CV 基础：图像分类与目标检测
+      - 让计算机「看懂」图片，就像教小孩认物体
+      - 用预训练 YOLO 模型完成图片中的目标检测
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 目标跟踪与行人重识别
+      - 在视频中持续追踪特定目标，像侦探盯人
+      - 用 ByteTrack + OSNet 实现视频多目标跟踪
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 图像分割与实例分割
+      - 不仅找到物体，还要画出轮廓
+      - 用 SAM 或 Mask R-CNN 实现图像分割
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 模型轻量化与边缘部署
+      - 把大象装进冰箱：让大模型在手机/边缘设备上跑
+      - 用 ONNX 导出模型并量化，在 Jetson 上运行推理
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: intermediate
+  语音技术:
+    goal: 理解语音识别(ASR)和语音合成(TTS)的核心原理
+    items:
+    - - 语音信号处理基础
+      - 声音的本质是震动波，要先把波变成数字
+      - 用 Python 提取 MFCC 特征并可视化语音波形
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - ASR 语音识别原理
+      - 把语音转文字，就像听写
+      - 用 Whisper 模型实现语音转文字并评估准确率
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - TTS 语音合成
+      - 让机器开口说话，从文字生成自然语音
+      - 用开源 TTS 模型将文本合成为语音并调优音质
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 声纹识别与语音唤醒
+      - 听声识人 + 喊名字就能唤醒
+      - 实现一个声纹辨认 demo 和关键词唤醒系统
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: intermediate
+  多模态大模型:
+    goal: 理解多模态模型原理和跨模态应用
+    items:
+    - - 多模态模型基础概念
+      - 让模型同时看懂图听懂声音，就像人类的多感官
+      - 对比不同多模态架构（CLIP/LLaVA/Qwen-VL）的异同
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - 图文理解与视觉问答
+      - 给模型一张图，让它回答关于图的问题
+      - 用开源 VLM 实现图片描述和视觉问答
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 多模态 RAG
+      - 不仅能搜文字，还能搜图片和视频
+      - 搭建一个支持图文混合检索的 RAG 系统
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - 跨模态对齐与训练
+      - 让语言和视觉的特征向量能在同一空间比较
+      - 用对比学习实现图文特征对齐的 demo
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
+  模型推理与部署优化:
+    goal: 掌握大模型推理加速和 GPU 部署优化
+    items:
+    - - 推理优化基础概念
+      - 让模型跑得更快更省资源，就像给跑车调发动机
+      - 理解 KV Cache、Continuous Batching、Flash Attention 原理
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 模型量化技术
+      - INT8/FP16 量化：用少量精度换大幅加速
+      - 用 GPTQ/AWQ 对模型量化并对比推理速度和质量
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 推理引擎实践
+      - vLLM/SGLang/TensorRT-LLM 就像不同的赛车引擎
+      - 用 vLLM 部署一个模型并对比性能调优前后的吞吐量
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - GPU 算力管理与成本优化
+      - GPU 是按秒计费的，不能闲着
+      - 设计 GPU 调度策略，实现吞吐/延迟/成本的最优平衡
+      - 2.0
+      - level: L3
+        style: analytical
+        prereq: intermediate
+  AIGC 与内容生成:
+    goal: 掌握 AIGC 工具链和内容生成落地实践
+    items:
+    - - AIGC 工具链概览
+      - AI 生成内容就像有了一个永不疲倦的创作团队
+      - 梳理 AIGC 生态（文生图/文生视频/文生音频/3D生成）的关键工具
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - ComfyUI 工作流搭建
+      - 用节点图编排生成流程，像搭积木
+      - 搭建一个 ComfyUI 文生图 + ControlNet 组合工作流
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 视频生成与编辑
+      - 从文生视频到视频编辑，AI 正在重塑影视制作
+      - 用开源视频生成模型生成一段短视频并做风格迁移
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - AIGC 产品化落地
+      - AIGC 不是玩具，要考虑成本和效果
+      - 分析 3 个 AIGC 产品的商业模式和技术架构
+      - 1.5
+      - level: L3
+        style: analytical
+        prereq: intermediate
+  数据工程与模型评测:
+    goal: 掌握训练数据全生命周期管理和模型评估方法
+    items:
+    - - 数据清洗与质量管理
+      - 垃圾进垃圾出，数据质量决定模型上限
+      - 对一个原始数据集做清洗、去重、异常检测
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 合成数据构造
+      - 没有真实数据？用大模型自己造数据
+      - 用 LLM 生成高质量的 SFT 训练数据
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 模型评测体系
+      - 不只看指标，还要看真实效果
+      - 搭建包含 BLEU/ROUGE/LLM-as-a-judge 的综合评测流水线
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 数据飞轮与持续迭代
+      - 用线上数据反哺模型，形成正向循环
+      - 设计一个数据采集→标注→训练→评估→上线的闭环流程
+      - 1.5
+      - level: L3
+        style: analytical
+        prereq: intermediate
+  AI 安全与对齐:
+    goal: 理解大模型安全风险和 Alignment 技术
+    items:
+    - - AI 安全风险概览
+      - 大模型能力越强，安全风险越大
+      - 整理大模型的 6 类安全风险（越狱/幻觉/偏见/隐私/有害内容/滥用）
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 越狱攻击与防御
+      - 像黑客一样思考，才能防御黑客
+      - 复现 2 种越狱攻击方法并实现对应的防御策略
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - RLHF 与人类反馈对齐
+      - 让模型学会说人话、做人事
+      - 理解 RLHF 原理并用偏好数据训练奖励模型
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
+    - - AI 伦理与合规
+      - 技术中性但使用有边界
+      - 分析 2 个 AI 伦理争议案例并提出治理建议
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+  强化学习基础:
+    goal: 理解强化学习核心概念和 RLHF 应用
+    items:
+    - - RL 基础：智能体与环境
+      - 让小老鼠在迷宫里学习找奶酪
+      - 用 Gym 搭建一个简单环境并实现 Q-Learning
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 策略梯度与 PPO
+      - 让模型自己学会什么动作能得到更多奖励
+      - 用 PPO 算法完成一个连续控制任务
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - RLHF 与奖励建模
+      - 人类偏好作为奖励信号，对齐模型输出
+      - 用偏好数据训练 Reward Model 并评估对齐效果
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: intermediate
+  AI 产品设计与需求分析:
+    goal: 掌握 AI 产品设计方法和需求文档规范
+    items:
+    - - AI 产品需求文档(PRD)
+      - 把 AI 产品想法变成可执行的开发文档
+      - 为一个 AI Agent 产品撰写完整 PRD（含输入/输出/异常/验收）
+      - 1.5
+      - level: L1
+        style: writing
+        prereq: none
+    - - 用户体验与原型设计
+      - 好产品从好体验开始
+      - 用 Figma 或 Axure 设计一个 AI 对话产品的交互原型
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - AI 产品指标与效果评估
+      - 如何衡量 AI 产品的好坏
+      - 为一个 AI 产品设计核心指标体系和 A/B 测试方案
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - AI 产品的商业分析
+      - 技术好不如卖得好
+      - 分析 3 个 AI 产品的商业模式和成本结构
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 竞品分析与技术趋势
+      - 知己知彼，看清 AI 赛道
+      - 对 3 个同类 AI 产品做深度竞品分析并输出报告
+      - 1.5
+      - level: L2
+        style: writing
+        prereq: basic
+  MLOps 与模型运维:
+    goal: 掌握 ML 系统的监控、运维和持续交付
+    items:
+    - - MLOps 基础与 LLMOps 特点
+      - ML 系统的运维和传统软件有什么不同
+      - 对比传统 DevOps 和 MLOps/LLMOps 的差异并画出流程
+      - 1.5
+      - level: L1
+        style: analytical
+        prereq: none
+    - - 监控与可观测性
+      - 系统跑得好不好，数据说了算
+      - 为模型推理服务搭建 Prometheus + Grafana 监控面板
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - 模型版本管理与 A/B 测试
+      - 模型也要做版本控制和灰度发布
+      - 设计模型注册中心和 A/B 测试分流方案
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 弹性伸缩与容灾
+      - 流量高峰来了怎么办
+      - 配置 K8s HPA + 多模型路由实现弹性推理服务
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: intermediate
+  推荐系统:
+    goal: 理解推荐系统核心算法和工程架构
+    items:
+    - - 推荐系统基础：召回与排序
+      - 从海量物品中挑出用户可能喜欢的，像图书馆管理员荐书
+      - 实现基于协同过滤的召回和 LR 粗排
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 深度学习推荐模型
+      - 用神经网络理解用户和物品的特征交互
+      - 实现 DeepFM 或 DIN 推荐模型并对比效果
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
+    - - 推荐系统工程
+      - 推荐不仅是算法，还有工程架构
+      - 设计一个实时推荐系统的架构（特征/召回/排序/重排/兜底）
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 大模型在推荐系统中的应用
+      - LLM 正在重塑推荐系统的范式
+      - 用 LLM 做推荐理由生成和用户意图理解
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+  AI 测试与质量保障:
+    goal: 掌握 AI 驱动测试和智能测试平台搭建
+    items:
+    - - 传统测试 vs AI 测试
+      - AI 测试不是手动点按钮，而是用 AI 测试 AI
+      - 梳理 AI 测试与传统测试的核心差异和新增挑战
+      - 1.0
+      - level: L1
+        style: analytical
+        prereq: none
+    - - AI 辅助测试开发
+      - 用大模型写测试用例、生成自动化脚本
+      - 用 Claude Code / Copilot 为一个模块生成完整测试套件
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
+    - - AI 模型测试
+      - 模型不是代码，不能用 assert 测
+      - 为模型的准确率/鲁棒性/公平性设计测试方案
+      - 1.5
+      - level: L2
+        style: analytical
+        prereq: basic
+    - - 自动化测试框架搭建
+      - 让测试可以自动执行、自动报告
+      - 用 pytest + pytest-bdd 搭建 AI 产品自动化测试框架
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: basic
