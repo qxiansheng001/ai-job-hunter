@@ -73,6 +73,21 @@ skill 会自动帮你完成所有步骤：
 
 你只需要在引导下登录一次 BOSS直聘，其余都是自动的。
 
+### 各平台 Chrome 启动方式
+
+如果引导时需手动启动 Chrome，对应平台的命令：
+
+```bash
+# Windows（cmd）
+start chrome --remote-debugging-port=9222
+
+# macOS
+open -a "Google Chrome" --args --remote-debugging-port=9222
+
+# Linux
+google-chrome --remote-debugging-port=9222
+```
+
 ---
 
 ## 子命令
