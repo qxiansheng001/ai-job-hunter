@@ -31,6 +31,16 @@ job-init → job-scan → job-analyze
 数据目录可通过 `AI_JOB_HUNTER_DATA` 环境变量配置，默认为 `../ai-job-hunter-data/`（skill 目录外）。
 状态文件 `$AI_JOB_HUNTER_DATA/.skill-state.json` 保存所有进度状态。
 
+## 自动设置
+
+首次进入自动安装依赖：
+
+```bash
+DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+mkdir -p "$DATA_DIR/subjects"
+pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.txt
+```
+
 ## 子技能路由
 
 ### 检测入口

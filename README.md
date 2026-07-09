@@ -44,47 +44,34 @@ flowchart LR
 ### 前置条件
 
 - Python 3.10+
-- Google Chrome（用于抓取 BOSS 直聘）
-- [Claude Code](https://claude.ai/claude-code)
+- Google Chrome
+- [Claude Code](https://claude.ai/claude-code)（命令行或 IDE 扩展均可）
 
-### 5 分钟上手
+### 两步启动
 
 ```bash
 # 1. 克隆
 git clone https://github.com/qxiansheng001/ai-job-hunter.git
 cd ai-job-hunter
 
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 启动 Chrome（远程调试模式）
-# Windows:
-start chrome --remote-debugging-port=9222
-
-# macOS:
-open -a "Google Chrome" --args --remote-debugging-port=9222
-
-# Linux:
-google-chrome --remote-debugging-port=9222
-
-# 4. 在 Chrome 中登录 BOSS直聘（zhipin.com）
-# 5. 在 Claude Code 中打开此目录，输入：
+# 2. 在 Claude Code 中打开此目录，输入：
 ```
 
-> "开始求职" 或 "帮我找 AI 工作"
+> "开始求职"
 
-### 首次运行流程
+### 之后会发生什么
 
-Claude Code 会引导你依次完成：
+skill 会自动帮你完成所有步骤：
 
 ```
-① 采集你的技术栈、学历、经验 → 判定 S0-S3 档位
-② 推荐匹配岗位 → 自动抓取 BOSS 直聘真实数据
-③ 生成市场需求分析报告
-④ 生成 30/60/90 天定制学习计划
+① 自动安装 Python 依赖（无需手动 pip install）
+② 采集你的技术栈、学历、经验 → 判定起点档位
+③ 引导你启动 Chrome 并登录 BOSS直聘
+④ 推荐匹配岗位 → 自动抓取真实数据
+⑤ 生成市场需求分析报告 + 30/60/90 天定制学习计划
 ```
 
-全程约 10-15 分钟（取决于抓取数据量）。
+你只需要在引导下登录一次 BOSS直聘，其余都是自动的。
 
 ---
 
