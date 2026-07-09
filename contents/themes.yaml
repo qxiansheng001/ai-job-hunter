@@ -463,13 +463,69 @@ THEME_POOL:
       - level: L1
         style: practical
         prereq: none
-    - - 序列到序列模型
-      - 把一种序列变成另一种序列
+    - - 文本预处理与分词技术
+      - 让计算机认识单词就像小孩学识字，先要把句子拆成最小单元
+      - 用 jieba 和 spaCy 完成中文分词、去除停用词、词性标注
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 词向量与表示学习
+      - 把单词变成数学向量——找到词与词之间的语义关系
+      - 用 gensim 训练 Word2Vec 模型并可视化词向量聚类
+      - 1.0
+      - level: L1
+        style: practical
+        prereq: none
+    - - 循环神经网络与序列建模
+      - 让网络有记忆——处理前后关联的文本就像读句子不能只看一个词
+      - 用 PyTorch 实现 LSTM 文本分类器
+      - 1.5
+      - level: L1
+        style: technical
+        prereq: basic
+    - - 序列到序列模型与注意力机制
+      - 把一种序列变成另一种序列，注意力让模型知道该看哪里
       - 用预训练模型完成文本摘要任务
       - 1.0
       - level: L2
         style: practical
         prereq: basic
+    - - Transformer 在 NLP 中的应用
+      - 注意力就是一切——Transformer 如何彻底改变 NLP
+      - 用 PyTorch 实现 Transformer Encoder 并用于文本分类
+      - 1.5
+      - level: L2
+        style: technical
+        prereq: intermediate
+    - - BERT 与预训练语言模型
+      - 让模型先读书再干活——预训练+微调范式
+      - 用 HuggingFace 加载 BERT 并微调完成情感分析
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: intermediate
+    - - 文本分类与情感分析实战
+      - 教会计算机判断文字的情绪——评论是好评还是差评
+      - 用 BERT/RoBERTa 完成多分类情感分析任务并评估
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: intermediate
+    - - 命名实体识别与关系抽取
+      - 从文本中提取人名地名组织名——让计算机读懂新闻里的关键信息
+      - 用 HuggingFace Token Classification 实现 NER 系统
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - 文本生成与自动摘要
+      - 让计算机写总结——理解长文本后提炼核心要点
+      - 用 T5/BART 实现长文本摘要生成并评估 ROUGE 分数
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: advanced
   微服务架构:
     goal: 理解微服务设计原则和服务间通信
     items:
@@ -610,33 +666,82 @@ THEME_POOL:
       - level: L1
         style: practical
         prereq: none
+    - - 图像处理基础
+      - 计算机看图片就是看数字矩阵——滤波、边缘、特征都是数学运算
+      - 用 OpenCV 实现高斯滤波、Canny 边缘检测和 SIFT 特征提取
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 卷积神经网络基础
+      - 卷积核就像滑动窗口扫描图片的每个局部
+      - 用 PyTorch 从零搭建 CNN 并在 MNIST/CIFAR-10 上训练
+      - 1.5
+      - level: L1
+        style: technical
+        prereq: basic
+    - - 图像分类实战：ResNet/EfficientNet
+      - 网络越深效果越好？残差连接让百层网络也能训练
+      - 用预训练 ResNet 做迁移学习完成自定义图片分类
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: intermediate
+    - - 目标检测深入：YOLO/Faster R-CNN
+      - 不仅要分类还要定位——在一张图中找出所有物体和位置
+      - 用 YOLOv8 训练自定义目标检测模型并评估 mAP
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: intermediate
+    - - 图像分割与实例分割
+      - 不仅找到物体，还要画出轮廓——像素级理解
+      - 用 SAM 或 Mask R-CNN 实现图像分割
+      - 1.5
+      - level: L2
+        style: practical
+        prereq: intermediate
     - - 目标跟踪与行人重识别
       - 在视频中持续追踪特定目标，像侦探盯人
       - 用 ByteTrack + OSNet 实现视频多目标跟踪
       - 2.0
       - level: L2
         style: technical
-        prereq: basic
-    - - 图像分割与实例分割
-      - 不仅找到物体，还要画出轮廓
-      - 用 SAM 或 Mask R-CNN 实现图像分割
-      - 1.5
-      - level: L2
+        prereq: intermediate
+    - - 图像生成：GAN 与扩散模型
+      - 让计算机凭空创造图片——从对抗生成到去噪扩散
+      - 用 Stable Diffusion 做文生图并尝试 ControlNet 条件控制
+      - 2.0
+      - level: L3
         style: practical
-        prereq: basic
+        prereq: intermediate
+    - - 视频理解与行为识别
+      - 让计算机看懂视频——不仅是图片，还有时序动作
+      - 用 VideoMAE 或 SlowFast 实现视频动作分类
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
     - - 模型轻量化与边缘部署
       - 把大象装进冰箱：让大模型在手机/边缘设备上跑
       - 用 ONNX 导出模型并量化，在 Jetson 上运行推理
       - 2.0
       - level: L3
         style: technical
-        prereq: intermediate
+        prereq: advanced
   语音技术:
     goal: 理解语音识别(ASR)和语音合成(TTS)的核心原理
     items:
     - - 语音信号处理基础
       - 声音的本质是震动波，要先把波变成数字
       - 用 Python 提取 MFCC 特征并可视化语音波形
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - 音频数据增强与特征工程
+      - 给训练数据加噪音和变速，让模型在各种环境下都能听清
+      - 用 torchaudio 实现音频数据增强（加噪/变速/混响）并对比效果
       - 1.5
       - level: L1
         style: practical
@@ -655,13 +760,34 @@ THEME_POOL:
       - level: L2
         style: practical
         prereq: basic
+    - - 说话人分离与多人对话分析
+      - 一段录音里有几个人在说话？谁说了什么？
+      - 用 PyAnnote 实现说话人分离（Speaker Diarization）并对话轮分析
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: intermediate
+    - - 语音情感识别与副语言分析
+      - 听语气就能判断情绪——开心、愤怒还是悲伤
+      - 用预训练语音情感模型识别音频中的情绪标签并可视化
+      - 1.5
+      - level: L3
+        style: practical
+        prereq: intermediate
+    - - 语音增强与降噪
+      - 在嘈杂环境中把清晰的语音「提取」出来
+      - 实现基于频谱减法和深度学习（DeepFilterNet）的语音增强
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
     - - 声纹识别与语音唤醒
       - 听声识人 + 喊名字就能唤醒
       - 实现一个声纹辨认 demo 和关键词唤醒系统
       - 2.0
       - level: L3
         style: technical
-        prereq: intermediate
+        prereq: advanced
   多模态大模型:
     goal: 理解多模态模型原理和跨模态应用
     items:
@@ -672,6 +798,13 @@ THEME_POOL:
       - level: L1
         style: analytical
         prereq: none
+    - - 多模态表示学习与 CLIP 原理
+      - 用对比学习把图文映射到同一向量空间，就像给每种语言建词典
+      - 用 OpenCLIP 训练或微调一个图文匹配模型并评估 Recall@K
+      - 1.5
+      - level: L1
+        style: technical
+        prereq: basic
     - - 图文理解与视觉问答
       - 给模型一张图，让它回答关于图的问题
       - 用开源 VLM 实现图片描述和视觉问答
@@ -679,12 +812,19 @@ THEME_POOL:
       - level: L2
         style: practical
         prereq: basic
-    - - 多模态 RAG
-      - 不仅能搜文字，还能搜图片和视频
-      - 搭建一个支持图文混合检索的 RAG 系统
+    - - 文生图与文生视频
+      - 让计算机凭空画出图片和视频——从扩散模型到世界模拟器
+      - 用 Stable Diffusion 实现文生图并用 AnimateDiff 生成短视频
       - 2.0
-      - level: L3
+      - level: L2
         style: practical
+        prereq: intermediate
+    - - 视频多模态理解
+      - 让计算机看懂视频——理解镜头切换、物体运动和叙事情节
+      - 用 Video-LLaMA 或 Qwen2-VL 实现视频内容描述和时序问答
+      - 2.0
+      - level: L2
+        style: technical
         prereq: intermediate
     - - 跨模态对齐与训练
       - 让语言和视觉的特征向量能在同一空间比较
@@ -692,6 +832,20 @@ THEME_POOL:
       - 2.0
       - level: L3
         style: technical
+        prereq: advanced
+    - - 多模态模型微调与指令跟随
+      - 让预训练多模态模型学会遵循复杂指令
+      - 用 LLaVA 微调框架在自定义数据集上做多模态指令微调
+      - 2.0
+      - level: L3
+        style: practical
+        prereq: advanced
+    - - 多模态 RAG
+      - 不仅能搜文字，还能搜图片和视频
+      - 搭建一个支持图文混合检索的 RAG 系统
+      - 2.0
+      - level: L3
+        style: practical
         prereq: advanced
   模型推理与部署优化:
     goal: 掌握大模型推理加速和 GPU 部署优化
@@ -889,6 +1043,20 @@ THEME_POOL:
       - level: L1
         style: analytical
         prereq: none
+    - - 实验跟踪与模型注册
+      - 做实验不记笔记等于白做——ML 实验的版本管理
+      - 用 MLflow 搭建实验跟踪和模型注册中心
+      - 1.5
+      - level: L1
+        style: practical
+        prereq: none
+    - - ML 流水线编排
+      - 从数据到模型到部署——自动化 ML 流水线
+      - 用 Airflow 或 Kubeflow Pipeline 搭建端到端 ML 流水线
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: basic
     - - 监控与可观测性
       - 系统跑得好不好，数据说了算
       - 为模型推理服务搭建 Prometheus + Grafana 监控面板
@@ -896,13 +1064,20 @@ THEME_POOL:
       - level: L2
         style: practical
         prereq: basic
+    - - 模型服务部署：FastAPI/Triton
+      - 把训练好的模型变成可调用的 API 服务
+      - 用 FastAPI 封装模型并用 Triton Inference Server 做高性能推理
+      - 2.0
+      - level: L2
+        style: practical
+        prereq: intermediate
     - - 模型版本管理与 A/B 测试
       - 模型也要做版本控制和灰度发布
       - 设计模型注册中心和 A/B 测试分流方案
       - 1.5
       - level: L2
         style: technical
-        prereq: basic
+        prereq: intermediate
     - - 弹性伸缩与容灾
       - 流量高峰来了怎么办
       - 配置 K8s HPA + 多模型路由实现弹性推理服务
@@ -910,6 +1085,13 @@ THEME_POOL:
       - level: L3
         style: practical
         prereq: intermediate
+    - - 模型漂移检测与自动回滚
+      - 模型上线后效果变差了怎么办——自动发现问题并回滚
+      - 实现数据漂移和概念漂移检测并配置自动回滚策略
+      - 2.0
+      - level: L3
+        style: technical
+        prereq: advanced
   推荐系统:
     goal: 理解推荐系统核心算法和工程架构
     items:
@@ -920,6 +1102,13 @@ THEME_POOL:
       - level: L1
         style: practical
         prereq: none
+    - - 推荐系统评估指标
+      - 推荐得好不好不能靠感觉——精确率/召回率/NDCG/MAP
+      - 在公开数据集上计算推荐结果的命中率、覆盖率、新颖度
+      - 1.5
+      - level: L1
+        style: technical
+        prereq: none
     - - 深度学习推荐模型
       - 用神经网络理解用户和物品的特征交互
       - 实现 DeepFM 或 DIN 推荐模型并对比效果
@@ -927,20 +1116,41 @@ THEME_POOL:
       - level: L2
         style: technical
         prereq: basic
+    - - 序列推荐模型
+      - 用户行为有先后顺序——用历史行为序列预测下一个点击
+      - 实现 GRU4Rec 或 SASRec 模型并在电商数据上训练评估
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: intermediate
+    - - 多目标排序与模型融合
+      - 既要点击率又要转化率——多个优化目标如何平衡
+      - 实现 MMoE 或多任务学习模型并对比单任务效果
+      - 2.0
+      - level: L2
+        style: technical
+        prereq: intermediate
     - - 推荐系统工程
       - 推荐不仅是算法，还有工程架构
       - 设计一个实时推荐系统的架构（特征/召回/排序/重排/兜底）
       - 1.5
       - level: L2
         style: analytical
-        prereq: basic
+        prereq: intermediate
+    - - 冷启动与探索利用策略
+      - 新用户和新物品没有行为数据怎么办——平衡探索和利用
+      - 实现 Epsilon-Greedy/UCB/Thompson Sampling 并在模拟环境中对比
+      - 1.5
+      - level: L3
+        style: technical
+        prereq: intermediate
     - - 大模型在推荐系统中的应用
       - LLM 正在重塑推荐系统的范式
       - 用 LLM 做推荐理由生成和用户意图理解
       - 1.5
       - level: L3
         style: practical
-        prereq: intermediate
+        prereq: advanced
   AI 测试与质量保障:
     goal: 掌握 AI 驱动测试和智能测试平台搭建
     items:

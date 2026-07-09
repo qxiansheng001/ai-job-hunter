@@ -61,6 +61,29 @@ SKILL_RESOURCES = _content.get("SKILL_RESOURCES") or {
         "《利用Python进行数据分析》", "Kaggle Learn 数据分析微课程"]},
     "Linux": {"type": "工具", "priority": "选学", "resources": [
         "《鸟哥的Linux私房菜》基础篇", "missing.csail.mit.edu"]},
+    "NLP": {"type": "方向", "priority": "核心", "resources": [
+        "HuggingFace NLP Course", "《Speech and Language Processing》Jurafsky"],
+        },
+    "BERT": {"type": "模型", "priority": "必修", "resources": [
+        "BERT 原论文", "HuggingFace 文本分类教程"]},
+    "Transformer": {"type": "模型", "priority": "必修", "resources": [
+        "《Attention Is All You Need》", "The Annotated Transformer"]},
+    "计算机视觉": {"type": "方向", "priority": "核心", "resources": [
+        "CS231n 斯坦福课程", "d2l.ai 计算机视觉章节"]},
+    "YOLO": {"type": "模型", "priority": "必修", "resources": [
+        "Ultralytics YOLOv8 文档", "YOLO 原论文"]},
+    "OpenCV": {"type": "库", "priority": "必修", "resources": [
+        "OpenCV 官方教程 docs.opencv.org"]},
+    "语音识别": {"type": "技术", "priority": "必修", "resources": [
+        "OpenAI Whisper GitHub", "HuggingFace 语音教程"]},
+    "TTS": {"type": "技术", "priority": "必修", "resources": [
+        "Coqui TTS GitHub", "VITS 论文"]},
+    "多模态": {"type": "方向", "priority": "核心", "resources": [
+        "CLIP 原论文", "LLaVA 论文与代码", "HuggingFace 多模态教程"]},
+    "MLOps": {"type": "方向", "priority": "核心", "resources": [
+        "MLflow 官方文档", "Kubeflow 入门教程"]},
+    "推荐系统": {"type": "方向", "priority": "核心", "resources": [
+        "《推荐系统实践》项亮", "d2l.ai 推荐系统章节"]},
 }
 
 # 技能名称 → WEEKLY_PLANS 中对应 theme 的映射
@@ -110,6 +133,77 @@ SKILL_TO_THEME = _content.get("SKILL_TO_THEME") or {
     "Linux": "Linux 与命令行",
     "Shell": "Linux 与命令行",
     "命令行": "Linux 与命令行",
+    # ── NLP 方向 ──
+    "NLP基础": "NLP",
+    "文本分类": "NLP",
+    "NER": "NLP",
+    "命名实体识别": "NLP",
+    "词向量": "NLP",
+    "Word2Vec": "NLP",
+    "文本生成": "NLP",
+    "文本摘要": "NLP",
+    "情感分析": "NLP",
+    "BERT": "NLP",
+    "Transformer": "NLP",
+    "LSTM": "NLP",
+    "机器翻译": "NLP",
+    "jieba": "NLP",
+    "spaCy": "NLP",
+    # ── 计算机视觉方向 ──
+    "计算机视觉": "计算机视觉",
+    "CV": "计算机视觉",
+    "图像分类": "计算机视觉",
+    "目标检测": "计算机视觉",
+    "YOLO": "计算机视觉",
+    "图像分割": "计算机视觉",
+    "OpenCV": "计算机视觉",
+    "图像处理": "计算机视觉",
+    "CNN": "计算机视觉",
+    "ResNet": "计算机视觉",
+    "图像生成": "计算机视觉",
+    "扩散模型": "计算机视觉",
+    "视频理解": "计算机视觉",
+    "行为识别": "计算机视觉",
+    "ONNX": "计算机视觉",
+    "TensorRT": "计算机视觉",
+    # ── 语音技术方向 ──
+    "语音识别": "语音技术",
+    "ASR": "语音技术",
+    "TTS": "语音技术",
+    "语音合成": "语音技术",
+    "语音": "语音技术",
+    "Whisper": "语音技术",
+    "声纹识别": "语音技术",
+    "说话人分离": "语音技术",
+    "语音增强": "语音技术",
+    "语音情感": "语音技术",
+    # ── 多模态方向 ──
+    "多模态": "多模态大模型",
+    "CLIP": "多模态大模型",
+    "VLM": "多模态大模型",
+    "视觉问答": "多模态大模型",
+    "文生图": "多模态大模型",
+    "文生视频": "多模态大模型",
+    "Stable Diffusion": "多模态大模型",
+    "LLaVA": "多模态大模型",
+    # ── MLOps 方向 ──
+    "MLOps": "MLOps 与模型运维",
+    "模型部署": "MLOps 与模型运维",
+    "模型监控": "MLOps 与模型运维",
+    "MLflow": "MLOps 与模型运维",
+    "Airflow": "MLOps 与模型运维",
+    "Kubeflow": "MLOps 与模型运维",
+    "模型漂移": "MLOps 与模型运维",
+    "Triton": "MLOps 与模型运维",
+    # ── 推荐系统方向 ──
+    "推荐系统": "推荐系统",
+    "协同过滤": "推荐系统",
+    "DeepFM": "推荐系统",
+    "召回": "推荐系统",
+    "排序": "推荐系统",
+    "多目标": "推荐系统",
+    "冷启动": "推荐系统",
+    "序列推荐": "推荐系统",
 }
 
 THEME_TO_SKILL = _content.get("THEME_TO_SKILL") or {v: k for k, v in SKILL_TO_THEME.items()}
@@ -130,6 +224,11 @@ WEEK_PHASE_MAP = _content.get("WEEK_PHASE_MAP") or {
     "AI 通识入门": 1,
     "数据分析与可视化": 2,
     "Linux 与命令行": 1,
+    "计算机视觉": 2,
+    "语音技术": 2,
+    "多模态大模型": 2,
+    "MLOps 与模型运维": 2,
+    "推荐系统": 2,
 }
 
 # 技能 → 难度等级映射
@@ -153,6 +252,25 @@ SKILL_DIFFICULTY = {
     "AI基础": "fundamental",
     "数据分析": "fundamental",
     "Linux": "fundamental",
+    "BERT": "advanced",
+    "Transformer": "advanced",
+    "情感分析": "fundamental",
+    "文本生成": "advanced",
+    "NER": "advanced",
+    "YOLO": "advanced",
+    "ResNet": "advanced",
+    "图像分割": "advanced",
+    "OpenCV": "fundamental",
+    "ASR": "advanced",
+    "TTS": "advanced",
+    "Whisper": "advanced",
+    "CLIP": "advanced",
+    "VLM": "advanced",
+    "多模态": "advanced",
+    "MLOps": "advanced",
+    "MLflow": "fundamental",
+    "协同过滤": "fundamental",
+    "DeepFM": "advanced",
 }
 
 # ── 前置依赖映射 ──
@@ -181,6 +299,12 @@ THEME_PREREQUISITES = _content.get("THEME_PREREQUISITES") or {
     "AI 通识入门": [],
     "数据分析与可视化": ["Python 基础编程"],
     "Linux 与命令行": [],
+    "NLP": ["LLM 与大模型基础"],
+    "计算机视觉": ["LLM 与大模型基础"],
+    "语音技术": ["LLM 与大模型基础"],
+    "多模态大模型": ["LLM 与大模型基础", "计算机视觉"],
+    "MLOps 与模型运维": ["生产级部署"],
+    "推荐系统": ["LLM 与大模型基础"],
 }
 
 # ── 持续时间内置项目/开源数量映射 ──
@@ -310,6 +434,12 @@ CONTENT_MAPPING = _content.get("CONTENT_MAPPING") or {
     "AI 通识入门": {"title": "AI 通识课：零基础读懂人工智能", "type": "学习笔记"},
     "数据分析与可视化": {"title": "数据分析师入门：Python 数据分析完整工作流", "type": "技术教程"},
     "Linux 与命令行": {"title": "Linux 命令行实战：开发者必会的 20 个命令", "type": "实操指南"},
+    "NLP": {"title": "NLP 入门到进阶：从词向量到预训练模型", "type": "技术教程"},
+    "计算机视觉": {"title": "计算机视觉实战：从图像分类到目标检测", "type": "技术教程"},
+    "语音技术": {"title": "语音技术入门：ASR/TTS/声纹识别实战指南", "type": "技术教程"},
+    "多模态大模型": {"title": "多模态大模型：CLIP/VLM/文生图原理与实践", "type": "深度分析"},
+    "MLOps 与模型运维": {"title": "MLOps 实战：从模型训练到生产部署的完整工作流", "type": "技术教程"},
+    "推荐系统": {"title": "推荐系统核心算法与工程实战", "type": "技术教程"},
 }
 
 PROJECT_CONTENT = _content.get("PROJECT_CONTENT") or {
