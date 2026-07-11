@@ -43,19 +43,32 @@ pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.tx
 
 ## 子技能路由
 
-### 检测入口
+### 状态检测（FSM 路由）
 
 ```bash
 DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
-test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
+python -c "
+import sys; sys.path.insert(0, 'scripts')
+from utils.fsm import detect_state
+import json
+try:
+    with open('$DATA_DIR/.skill-state.json') as f:
+        state = detect_state(json.load(f))
+except FileNotFoundError:
+    state = None
+print(f'STATE={state.value if state else \"no_state\"}')
+"
 ```
 
-- **MISSING** → 调用 `Skill` 执行 `job-init`
-- **EXISTS** → 读取 `$DATA_DIR/.skill-state.json` 判断进度，路由到对应子 skill：
-  - `job_search.status != "done"` → `job-scan`
-  - `analysis.report_file == ""` → `job-analyze`
-  - `learning_plan.target_role == ""` → `job-analyze`
-  - 其他 → 提示用户学习计划已就绪
+根据 STATE 输出路由：
+
+| STATE | 路由 |
+|-------|------|
+| `no_state` | 调用 `Skill` 执行 `job-init` |
+| `profile_done` | 调用 `Skill` 执行 `job-scan` |
+| `scan_done` | 调用 `Skill` 执行 `job-analyze`（生成 JD 分析） |
+| `analyze_done` | 调用 `Skill` 执行 `job-analyze`（生成学习计划） |
+| `plan_done` | 提示用户学习计划已就绪，调用 `Skill` 执行 `job-status` |
 
 ### 子技能列表
 

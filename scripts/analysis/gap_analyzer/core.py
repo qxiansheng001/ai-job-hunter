@@ -5,6 +5,8 @@ from analysis.skill_map import (
     PLATFORM_INFO, PLATFORM_TEMPLATES, MONETIZATION_PATHS, _FILLER_BLOCKS,
     THEME_TO_SKILL,
 )
+from utils.protocol import emit
+from utils.io import normalize_profile
 from utils.time import (
     _parse_hours_float, _compute_daily_hours, _format_hours_display, _self_drive_label,
 )
@@ -16,7 +18,7 @@ from utils.time import (
 
 def analyze_gap(profile_data, report_data, duration=90):
     """市场驱动型差距分析：60% 市场 + 30% 画像 + 10% 补充"""
-    profile = profile_data.get("profile", profile_data)
+    profile = normalize_profile(profile_data)
     user_skills = [s.lower() for s in profile.get("tech_stack", [])]
     ai_projects = (profile.get("ai_projects") or "").lower()
     strength_tags = profile.get("strength_tags", []) or profile.get("advantage_tags", [])
@@ -101,7 +103,9 @@ def analyze_gap(profile_data, report_data, duration=90):
                 if passes:
                     supplement_candidates.append({**supp, "actual_hours": supp["hours"]})
                     supp_hours_total += supp["hours"]
-            except Exception:
+            except Exception as e:
+                emit("gap.supplement.skip", f"跳过补充模块 {supp.get('name', '?')}: {e}",
+                     status="warn", warnings=[str(e)], stream=sys.stderr)
                 continue
 
     # Gap analysis (backward compatible)

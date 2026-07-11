@@ -22,19 +22,17 @@ import tempfile
 from urllib.parse import quote
 from datetime import datetime
 
+from utils.protocol import emit, emit_progress, emit_fatal
+
 try:
     import websockets
 except ImportError:
-    msg = {"error": "缺少 websockets 库，请执行: pip install websockets", "step": "dep"}
-    print(json.dumps(msg, ensure_ascii=False))
-    sys.exit(1)
+    emit_fatal("DEP_WEBSOCKETS", "缺少 websockets 库，请执行: pip install websockets")
 
 try:
     import httpx
 except ImportError:
-    msg = {"error": "缺少 httpx 库，请执行: pip install httpx", "step": "dep"}
-    print(json.dumps(msg, ensure_ascii=False))
-    sys.exit(1)
+    emit_fatal("DEP_HTTPX", "缺少 httpx 库，请执行: pip install httpx")
 
 
 def _chrome_path():
@@ -349,8 +347,8 @@ class BossScraper:
 
             url = (f"https://www.zhipin.com/web/geek/job?"
                    f"query={quote(keyword)}&city={city}&page={page}")
-            print(json.dumps({"step": "navigate", "page": page, "url": url},
-                             ensure_ascii=False))
+            emit("scraper.list.navigate", f"正在翻页第 {page} 页...",
+                 data={"page": page, "url": url})
             await self.navigate(url)
             # 首次等待稍长
             wait_for = 15 if page == 1 else 10
@@ -420,10 +418,11 @@ class BossScraper:
                 detail["list_title"] = item.get("title", "")
                 results.append(detail)
                 count += 1
-                print(f"  [{count}/{max_details}] {item.get('title')} @ {item.get('company')}",
-                      file=sys.stderr)
+                emit_progress("scraper.detail.progress", count, max_details,
+                              f"正在抓取详情 ({count}/{max_details}): {item.get('title')} @ {item.get('company')}")
             except Exception as e:
-                print(f"  [跳过] {item.get('title')}: {e}", file=sys.stderr)
+                emit("scraper.detail.skip", f"跳过 {item.get('title')}: {e}",
+                     status="warn", warnings=[str(e)], stream=sys.stderr)
                 continue
 
         return results
@@ -446,18 +445,19 @@ async def main():
     scraper = BossScraper(port=args.port)
 
     # 1. 连接
-    report = {"step": "connect", "message": f"正在连接 Chrome（端口 {args.port}）..."}
-    print(json.dumps(report, ensure_ascii=False))
+    emit("init", f"正在启动 boss_scraper，关键词: {args.keyword}",
+         data={"argv": sys.argv, "cwd": os.getcwd()})
+    emit("scraper.connect", f"正在连接 Chrome（端口 {args.port}）...")
     result = await scraper.connect()
     if "error" in result:
-        print(json.dumps(result, ensure_ascii=False))
+        emit("fatal", result["error"], status="error",
+             error={"code": "CHROME_CONNECT_FAIL", "traceback": ""})
         await scraper.close()
         sys.exit(1)
 
     # 2. 抓取列表
     keyword_label = args.keyword
-    report = {"step": "scrape_list", "message": f"正在搜索「{keyword_label}」..."}
-    print(json.dumps(report, ensure_ascii=False))
+    emit("scraper.list.start", f"正在搜索「{keyword_label}」...")
 
     items, diag = await scraper.scrape_list(
         args.keyword, args.city, args.max_items
@@ -479,8 +479,8 @@ async def main():
         output["status"] = "blocked" if diag.get("blocked") else "need_login"
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
-        print(json.dumps({"step": "failed", "message": diag.get("blocked_msg") or diag.get("need_login_msg"),
-                          "status": output["status"]}, ensure_ascii=False))
+        emit("scraper.blocked", diag.get("blocked_msg") or diag.get("need_login_msg"),
+             status="error", data={"status": output["status"]})
         await scraper.close()
         return
 
@@ -488,35 +488,31 @@ async def main():
         output["status"] = "no_results"
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
-        print(json.dumps({"step": "done", "message": "未找到匹配岗位", "count": 0},
-                         ensure_ascii=False))
+        emit("done", "未找到匹配岗位", data={"count": 0})
         await scraper.close()
         return
 
-    print(json.dumps({"step": "list_done", "message": f"列表页获取 {len(items)} 条",
-                      "count": len(items)}, ensure_ascii=False))
+    emit("scraper.list.done", f"列表页获取 {len(items)} 条",
+         data={"count": len(items)})
 
     # 3. 抓取详情
     # 详情抓取数量：0 表示"与列表条数相同"
     detail_limit = args.detail_count if args.detail_count > 0 else len(items)
     if detail_limit > 0:
-        print(json.dumps({"step": "scrape_detail",
-                          "message": f"正在抓取详情页（最多 {detail_limit} 条）..."},
-                         ensure_ascii=False))
+        emit("scraper.detail.start", f"正在抓取详情页（最多 {detail_limit} 条）...")
         details = await scraper.scrape_details(items, detail_limit)
         output["detail_count"] = len(details)
         output["detail_items"] = details
-        print(json.dumps({"step": "detail_done",
-                          "message": f"详情页获取 {len(details)} 条"},
-                         ensure_ascii=False))
+        emit("scraper.detail.done", f"详情页获取 {len(details)} 条",
+             data={"count": len(details)})
 
     # 4. 保存
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(json.dumps({"step": "done",
-                      "message": f"完成！列表 {len(items)} 条 + 详情 {output['detail_count']} 条",
-                      "output": args.output}, ensure_ascii=False))
+    emit("done",
+         f"完成！列表 {len(items)} 条 + 详情 {output['detail_count']} 条",
+         data={"list_count": len(items), "detail_count": output["detail_count"], "output": args.output})
 
     await scraper.close()
 

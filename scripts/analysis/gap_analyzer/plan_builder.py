@@ -115,7 +115,7 @@ def build_market_driven_plan(market_skills, supplement_candidates, duration, pro
             "mention_rate": e["mention_rate"], "source": e["source"],
         })
 
-    content = generate_plan_content(skills_with_depth, profile, duration, title)
+    content = generate_plan_content(skills_with_depth, profile)
 
     # 按阶段分组
     phase_groups = {1: [], 2: [], 3: []}
@@ -247,8 +247,7 @@ def build_continuous_plan(market_skills, supplement_candidates, duration, profil
             "mention_rate": ms.get("mention_rate", 0), "source": ms["source"],
         })
 
-    content = generate_plan_content(skills_with_depth, profile, duration,
-                                     title=gap_data.get("title", ""))
+    content = generate_plan_content(skills_with_depth, profile)
     content_theme_map = {t["theme"]: t for t in content.get("themes", [])}
 
     all_study_items = []

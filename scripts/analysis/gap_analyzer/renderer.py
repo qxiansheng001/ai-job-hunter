@@ -19,7 +19,8 @@ from utils.time import (
     _parse_hours_float, _parse_hours, _format_hours_display,
     _compute_time_coefficient, _compute_task_intensity, _self_drive_label,
 )
-from utils.io import load_profile, load_report
+from utils.io import load_profile, load_report, normalize_profile
+from utils.protocol import emit
 
 
 # ══════════════════════════════════════════════
@@ -79,7 +80,7 @@ def _phases_from_kus(kus):
 
 def generate_preview_json(profile_data, report_data, gap_data, title, duration, business):
     """Generate preview data dict for --preview mode."""
-    p = profile_data.get("profile", profile_data)
+    p = normalize_profile(profile_data)
     market_skills = gap_data.get("market_skills", [])
     supp_candidates = gap_data.get("supplement_candidates", [])
     total_jobs = report_data.get("total_jobs", 0)
@@ -93,27 +94,12 @@ def generate_preview_json(profile_data, report_data, gap_data, title, duration, 
     essential_list = [{"name": ms["name"], "mention_rate": ms.get("mention_rate", 0), "user_has": ms.get("user_has", False)} for ms in market_skills if ms.get("source") == "essential"]
     bonus_list = [{"name": ms["name"], "mention_rate": ms.get("mention_rate", 0), "user_has": ms.get("user_has", False)} for ms in market_skills if ms.get("source") == "bonus"]
 
-    use_continuous = bool(market_skills) and duration >= 30
-    plan_model = "continuous" if use_continuous else "week-based"
-    total_days = duration
-    project_count = 0
-    os_contribution_count = 0
-    review_day_count = 0
-    essential_covered = 0
-    bonus_covered = 0
+    plan_model = "continuous" if (bool(market_skills) and duration >= 30) else "week-based"
 
-    if use_continuous:
-        ps = build_continuous_plan(market_skills, supp_candidates, duration, p, gap_data)
-        total_days = ps["total_days"]
-        project_count = len(ps["projects"])
-        os_contribution_count = len(ps["os_contributions"])
-        review_day_count = len(ps["review_days"])
-        essential_covered = ps.get("essential_covered", 0)
-        bonus_covered = ps.get("bonus_covered", 0)
-
+    # 预览模式不执行完整计划构建（build_continuous_plan 仅在 generate_daily_plan 中调用一次）
     return {
         "title": title, "plan_model": plan_model, "total_jobs": total_jobs,
-        "duration": duration, "total_days": total_days,
+        "duration": duration, "total_days": duration,
         "weekly_hours": p.get("weekly_hours", ""),
         "intensity": gap_data.get("hours_tier", "标准"),
         "daily_hours": round(gap_data.get("daily_hours", 0), 1),
@@ -125,14 +111,16 @@ def generate_preview_json(profile_data, report_data, gap_data, title, duration, 
         "core_strengths": strengths,
         "essential_count": n_essential, "bonus_count": n_bonus,
         "essential_skills": essential_list, "bonus_skills": bonus_list,
-        "essential_coverage": f"{essential_covered}/{n_essential}" if n_essential > 0 else "N/A",
-        "bonus_coverage": f"{bonus_covered}/{n_bonus}" if n_bonus > 0 else "N/A",
+        "essential_coverage": "预览模式 → 生成时计算",
+        "bonus_coverage": "预览模式 → 生成时计算",
         "supplement_count": len(supp_candidates),
         "supplement_percent": round(supp_hours / total_hours * 100),
         "supplements": [{"name": s["name"], "label": s.get("label", ""), "hours": s.get("hours", 0)} for s in supp_candidates],
         "business_module": business == "y",
-        "project_count": project_count, "os_contribution_count": os_contribution_count,
-        "review_day_count": review_day_count,
+        "project_count": "预览模式 → 生成时计算",
+        "os_contribution_count": "预览模式 → 生成时计算",
+        "review_day_count": "预览模式 → 生成时计算",
+        "preview": True,
     }
 
 
@@ -143,7 +131,7 @@ def generate_preview_json(profile_data, report_data, gap_data, title, duration, 
 def generate_daily_plan(profile, gap_data, title, duration=60, business=False, commitment_period="", report_data=None):
     """生成含每日任务的详细学习计划"""
     lines = []
-    p = profile.get("profile", profile)
+    p = normalize_profile(profile)
     if report_data is None:
         report_data = {}
 
@@ -868,13 +856,25 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
     lines.append("")
     lines.append("| 项目 | 难度 | 涉及技能 | 说明 |")
     lines.append("|------|------|----------|------|")
-    projects = [
-        ("AI 知识库问答助手", "入门", "LangChain / RAG / Prompt", "基于 RAG 的个人知识库问答系统"),
-        ("多Agent 调研助手", "进阶", "LangGraph / Multi-Agent", "多个 Agent 协作完成搜索→分析→总结→报告"),
-        ("AI 编程助手", "进阶", "Agent / LLM / Tool Use", "类似 Claude Code 的 AI 编程助手"),
-        ("智能客服系统", "高阶", "RAG / 对话系统 / Agent", "结合 RAG 和 Agent 的智能客服"),
-    ]
-    for name, diff, skills, desc in projects:
+    # 从市场技能动态生成项目建议
+    market_skills_proj = gap_data.get("market_skills", [])
+    seen_proj = set()
+    proj_rows = []
+    for ms in market_skills_proj[:6]:
+        name = ms["name"]
+        if name in seen_proj:
+            continue
+        seen_proj.add(name)
+        mention = ms.get("mention_rate", 0)
+        diff = "入门" if mention < 30 else "进阶" if mention < 60 else "高阶"
+        proj_rows.append((f"AI {name} 实战", diff, name,
+                          f"基于 {name} 构建完整 AI 应用"))
+    if not proj_rows:
+        proj_rows = [
+            ("AI 知识库问答助手", "入门", "RAG / Prompt", "基于 RAG 的个人知识库问答系统"),
+            ("AI 编程助手", "进阶", "Agent / LLM", "基于 LLM 的 AI 编程助手"),
+        ]
+    for name, diff, skills, desc in proj_rows:
         lines.append(f"| **{name}** | {diff} | {skills} | {desc} |")
     lines.append("")
 
@@ -1117,13 +1117,14 @@ def main():
         print(json.dumps(preview, ensure_ascii=False, indent=2))
         return
 
-    print(json.dumps({"step": "profile", "message": "正在读取用户画像..."}, ensure_ascii=False))
-    print(json.dumps({"step": "report", "message": "正在读取 JD 分析报告..."}, ensure_ascii=False))
-    print(json.dumps({"step": "gap", "message": "正在进行差距分析..."}, ensure_ascii=False))
-    print(json.dumps({"step": "gap_done", "has": len(gap_data["has_skills"]),
-                       "missing": len(gap_data["missing_skills"])}, ensure_ascii=False))
-    print(json.dumps({"step": "plan", "message": "正在生成详细学习计划..."}, ensure_ascii=False))
-    commitment = args.commitment or profile.get("profile", {}).get("commitment_period", "")
+    emit("init", "正在启动计划生成器", data={"argv": sys.argv, "cwd": os.getcwd()})
+    emit("plan.profile", "正在读取用户画像...")
+    emit("plan.report", "正在读取 JD 分析报告...")
+    emit("plan.gap", "正在进行差距分析...")
+    emit("plan.gap_done", f"差距分析完成",
+         data={"has": len(gap_data["has_skills"]), "missing": len(gap_data["missing_skills"])})
+    emit("plan.build", "正在生成详细学习计划...")
+    commitment = args.commitment or normalize_profile(profile).get("commitment_period", "")
     plan = generate_daily_plan(profile, gap_data, title, duration=args.duration,
                                business=(args.business == "y"), commitment_period=commitment,
                                report_data=report_data)
@@ -1140,16 +1141,9 @@ def main():
     with open(output, "w", encoding="utf-8") as f:
         f.write(plan)
 
-    print(json.dumps({"step": "done", "message": f"学习计划已生成: {output}", "output": output},
-                     ensure_ascii=False))
-
-    print(f"\n{'='*60}", file=sys.stderr)
-    print(f"  {title} — 能力差距分析与学习计划", file=sys.stderr)
-    print(f"  已掌握: {len(gap_data['has_skills'])} 项", file=sys.stderr)
-    print(f"  待补充: {len(gap_data['missing_skills'])} 项", file=sys.stderr)
-    print(f"  学习周期: 约{args.duration}天", file=sys.stderr)
-    print(f"  输出文件: {output}", file=sys.stderr)
-    print(f"{'='*60}", file=sys.stderr)
+    emit("done", f"学习计划已生成: {output}",
+         data={"output": output, "has": len(gap_data["has_skills"]),
+               "missing": len(gap_data["missing_skills"]), "duration": args.duration})
 
 
 if __name__ == "__main__":

@@ -15,19 +15,19 @@ import argparse
 import tempfile
 from datetime import datetime
 
+from utils.protocol import emit, emit_fatal
+
 try:
     import pandas as pd
 except ImportError:
-    print(json.dumps({"error": "缺少 pandas 库，请执行: pip install pandas", "step": "dep"}))
-    sys.exit(1)
+    emit_fatal("DEP_PANDAS", "缺少 pandas 库，请执行: pip install pandas")
 
 try:
     from openpyxl import load_workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
 except ImportError:
-    print(json.dumps({"error": "缺少 openpyxl 库，请执行: pip install openpyxl", "step": "dep"}))
-    sys.exit(1)
+    emit_fatal("DEP_OPENPYXL", "缺少 openpyxl 库，请执行: pip install openpyxl")
 
 
 def clean_data(raw_path, output_path):
@@ -42,7 +42,7 @@ def clean_data(raw_path, output_path):
     city = raw.get("city", "")
 
     if not items:
-        print(json.dumps({"step": "warn", "message": "没有数据可清洗"}))
+        emit("clean.empty", "没有数据可清洗", status="warn")
         return False
 
     # 构建详情查找表：url → detail
@@ -135,18 +135,9 @@ def clean_data(raw_path, output_path):
 
     wb.save(output_path)
 
-    report = {
-        "step": "done",
-        "input_rows": before,
-        "after_dedup": after,
-        "output": output_path,
-        "message": f"清洗完成：{before} 条 → 去重后 {after} 条 → 已导出 {output_path}",
-    }
-    print(json.dumps(report, ensure_ascii=False))
-    print(f"\n📊 数据概览:", file=sys.stderr)
-    print(f"  原始条数: {before}", file=sys.stderr)
-    print(f"  去重后:   {after}", file=sys.stderr)
-    print(f"  输出文件: {output_path}", file=sys.stderr)
+    emit("done",
+         f"清洗完成：{before} 条 → 去重后 {after} 条 → 已导出 {output_path}",
+         data={"input_rows": before, "after_dedup": after, "output": output_path})
     return True
 
 
@@ -163,7 +154,11 @@ def main():
     temp_dir = os.path.join(tempfile.gettempdir(), "ai-job-hunter")
     if os.path.exists(temp_dir):
         import shutil
-        shutil.rmtree(temp_dir, ignore_errors=True)
+        try:
+            shutil.rmtree(temp_dir)
+        except OSError as e:
+            emit("clean.cleanup", f"清理临时文件失败: {e}",
+                 status="warn", warnings=[str(e)], stream=sys.stderr)
 
 
 if __name__ == "__main__":

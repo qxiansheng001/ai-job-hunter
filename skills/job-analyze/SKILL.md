@@ -141,11 +141,12 @@ python scripts/analysis/gap_analyzer/__main__.py \
   --duration {duration} \
   --business {business} \
   --commitment "{commitment_period}" \
-  --preview 2>/dev/null > _preview_config.json
+  --preview 2>/dev/null > "$DATA_DIR/_preview_config.json"
 
 python -c "
-import json
-with open('_preview_config.json') as f:
+import json, os
+DATA_DIR = os.environ.get('AI_JOB_HUNTER_DATA', '../ai-job-hunter-data')
+with open(os.path.join(DATA_DIR, '_preview_config.json')) as f:
     d = json.load(f)
 
 print('========== 计划生成配置确认 ==========')
@@ -182,7 +183,7 @@ print('请确认: 输入 Y 继续生成，输入 N 调整参数。')
 print('==========================================')
 "
 
-rm -f _preview_config.json
+rm -f "$DATA_DIR/_preview_config.json"
 ```
 
 展示配置摘要后，询问用户：

@@ -9,6 +9,22 @@ def load_profile(path):
         return json.load(f)
 
 
+def normalize_profile(data: dict) -> dict:
+    """统一提取 profile 子字典。
+
+    状态文件有两种存储格式：
+    1. profile 是顶层 dict 的一个字段: {"profile": {...}, "job_search": ...}
+    2. profile 本身就是整个 dict（旧格式）
+
+    normalize_profile 统一返回 profile 子字典，格式 2 直接返回自身。
+    """
+    if "profile" in data and isinstance(data["profile"], dict):
+        return data["profile"]
+    if "tech_stack" in data or "ai_experience_level" in data:
+        return data
+    return {}
+
+
 def load_report(path):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()

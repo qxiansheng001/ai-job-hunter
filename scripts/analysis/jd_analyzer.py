@@ -539,24 +539,11 @@ def main():
     with open(output, "w", encoding="utf-8") as f:
         f.write(report)
 
-    print(json.dumps({
-        "step": "done",
-        "message": f"报告已生成: {output}",
-        "output": output,
-        "total_jobs": stats["overview"]["total_jobs"],
-        "top_skills": list(stats["skill_stats"].keys())[:5],
-        "edu_summary": list(stats["edu_stats"].keys()) if stats["edu_stats"] else [],
-    }, ensure_ascii=False))
-
-    # 终端展示报告概览
-    print(f"\n{'='*60}", file=sys.stderr)
-    print(f"  {title} — JD 市场需求分析报告", file=sys.stderr)
-    print(f"  样本量: {stats['overview']['total_jobs']} 个岗位", file=sys.stderr)
-    print(f"  输出文件: {output}", file=sys.stderr)
-    print(f"{'='*60}", file=sys.stderr)
-
-    # 打印报告全文到终端
-    print(report)
+    from utils.protocol import emit
+    emit("done", f"报告已生成: {output}",
+         data={"output": output, "total_jobs": stats["overview"]["total_jobs"],
+               "top_skills": list(stats["skill_stats"].keys())[:5],
+               "edu_summary": list(stats["edu_stats"].keys()) if stats["edu_stats"] else []})
 
 
 if __name__ == "__main__":

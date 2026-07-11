@@ -1,6 +1,7 @@
 """内容包加载器：从 YAML 文件加载技能映射/学习内容/项目模板"""
 
 import os
+import sys
 
 CONTENT_PACK_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -27,6 +28,9 @@ def get_content_pack(pack_dir=None):
     try:
         import yaml
     except ImportError:
+        from utils.protocol import emit
+        emit("content.load", "缺少 PyYAML 库，内容包将不可用",
+             status="warn", stream=sys.stderr)
         return {}
 
     data = {}
@@ -39,7 +43,10 @@ def get_content_pack(pack_dir=None):
                 loaded = yaml.safe_load(f)
                 if loaded and isinstance(loaded, dict):
                     data.update(loaded)
-    except Exception:
+    except Exception as e:
+        from utils.protocol import emit
+        emit("content.load", f"内容包加载失败: {e}",
+             status="warn", warnings=[str(e)], stream=sys.stderr)
         return {}
 
     return data
