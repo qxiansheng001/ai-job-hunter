@@ -11,7 +11,14 @@ allowed-tools: Bash(*), Read, Write, Edit, Glob, Skill
 ## Step 0：上下文检查
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ```
 
@@ -49,10 +56,10 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 - 推进 `current_day` / `current_week` / `current_phase`
 - 写 `retro_log[]`：`{ event, summary, next_action }`
 
-**产出落盘：** 用户产出不停在聊天里，存到 `workspace/day-NN/` 目录。
+**产出落盘：** 用户产出不停在聊天里，存到 `$DATA_DIR/workspace/day-NN/` 目录。
 
 ```bash
-mkdir -p workspace/day-{current_week}-{current_day}
+mkdir -p "$DATA_DIR/workspace/day-{current_week}-{current_day}"
 ```
 
 ## Step 4：卡住处理
@@ -69,7 +76,7 @@ mkdir -p workspace/day-{current_week}-{current_day}
 ## Step 5：连续 3 天无交付
 
 ```bash
-test -d workspace/day-{prev_week}-{prev_day} && echo HAS_OUTPUT || echo NO_OUTPUT
+test -d "$DATA_DIR/workspace/day-{prev_week}-{prev_day}" && echo HAS_OUTPUT || echo NO_OUTPUT
 ```
 
 连续 3 天无产出 → 询问用户是否需要调整计划或暂停。

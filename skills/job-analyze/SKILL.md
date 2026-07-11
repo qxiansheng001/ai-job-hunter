@@ -11,7 +11,14 @@ allowed-tools: Bash(*), Read, Write, Edit, Glob, Skill, WebSearch, WebFetch
 ## Step 0：上下文检查
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ```
 
@@ -20,7 +27,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 读取 `$DATA_DIR/.skill-state.json`，检查 `job_search.status == "done"`。
 - 未完成 → 告知用户"请先完成岗位扫描"，调用 `Skill` 执行 `job-scan`
 
-读 `../../shared-references/analysis-rubric.md` 参考分析方法论。
+读 SKILL_DIR 下的 `shared-references/analysis-rubric.md` 参考分析方法论。
 
 ### 画像完整性检查
 
@@ -41,7 +48,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ## Step 1：JD 分析
 
 ```bash
-python scripts/analysis/jd_analyzer.py \
+python "$SKILL_DIR/scripts/analysis/jd_analyzer.py" \
   --input {clean_file} \
   --title "{keyword}"
 ```
@@ -134,7 +141,7 @@ python scripts/analysis/jd_analyzer.py \
 在生成完整计划前，先调用预览模式展示配置摘要：
 
 ```bash
-python scripts/analysis/gap_analyzer/__main__.py \
+python "$SKILL_DIR/scripts/analysis/gap_analyzer/__main__.py" \
   --profile "$DATA_DIR/.skill-state.json" \
   --report "$DATA_DIR/subjects/{keyword}/JD_Analysis_Report.md" \
   --title "{keyword}" \
@@ -145,7 +152,7 @@ python scripts/analysis/gap_analyzer/__main__.py \
 
 python -c "
 import json, os
-DATA_DIR = os.environ.get('AI_JOB_HUNTER_DATA', '../ai-job-hunter-data')
+DATA_DIR = '$DATA_DIR'
 with open(os.path.join(DATA_DIR, '_preview_config.json')) as f:
     d = json.load(f)
 
@@ -199,7 +206,7 @@ rm -f "$DATA_DIR/_preview_config.json"
 ## Step 3d：生成学习计划
 
 ```bash
-python scripts/analysis/gap_analyzer/__main__.py \
+python "$SKILL_DIR/scripts/analysis/gap_analyzer/__main__.py" \
   --profile "$DATA_DIR/.skill-state.json" \
   --report "$DATA_DIR/subjects/{keyword}/JD_Analysis_Report.md" \
   --title "{keyword}" \

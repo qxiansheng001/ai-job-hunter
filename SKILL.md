@@ -28,7 +28,8 @@ job-init → job-scan → job-analyze
 
 ## 状态文件
 
-数据目录可通过 `AI_JOB_HUNTER_DATA` 环境变量配置，默认为 `../ai-job-hunter-data/`（skill 目录外）。
+数据目录可通过 `AI_JOB_HUNTER_DATA` 环境变量配置，默认为 skill 目录同级的 `ai-job-hunter-data/`。
+所有路径引用已自动适配 — 无论 skill 安装在项目级还是全局级均可正常工作。
 状态文件 `$AI_JOB_HUNTER_DATA/.skill-state.json` 保存所有进度状态。
 
 ## 自动设置
@@ -36,9 +37,16 @@ job-init → job-scan → job-analyze
 首次进入自动安装依赖：
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 mkdir -p "$DATA_DIR/subjects"
-pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.txt
+pip install -q -r "$SKILL_DIR/requirements.txt" 2>/dev/null || pip install -r "$SKILL_DIR/requirements.txt"
 ```
 
 ## 子技能路由
@@ -46,9 +54,16 @@ pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.tx
 ### 状态检测（FSM 路由）
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 python -c "
-import sys; sys.path.insert(0, 'scripts')
+import sys; sys.path.insert(0, '$SKILL_DIR/scripts')
 from utils.fsm import detect_state
 import json
 try:

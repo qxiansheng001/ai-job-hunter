@@ -11,7 +11,14 @@ allowed-tools: Bash(*), Read, Write, Edit, Glob, Skill
 ## Step 0：上下文检查
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ```
 
@@ -19,7 +26,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 
 读取 `$DATA_DIR/.skill-state.json`，提取 profile（tech_stack、education、target_city 等）。
 
-读取 `../../shared-references/role-tiers.md` 参考档位信息。
+读取 SKILL_DIR 下的 `shared-references/role-tiers.md` 参考档位信息。
 
 ## Step 1：推荐岗位
 
@@ -100,13 +107,13 @@ print('TIMEOUT')
 ### 执行抓取
 
 ```bash
-python scripts/scraper/boss_scraper.py \
+python "$SKILL_DIR/scripts/scraper/boss_scraper.py" \
   --keyword "{岗位名称}" \
   --city "{城市编码（全国 100010000，北京 101010100）}" \
   --max-items 50
 ```
 
-城市编码参考 `../../shared-references/city_codes.md`（如果存在）或使用常用编码。
+城市编码参考 SKILL_DIR 下的 `shared-references/city_codes.md`（如果存在）或使用常用编码。
 
 ### 抓取结果
 
@@ -115,8 +122,7 @@ python scripts/scraper/boss_scraper.py \
 ## Step 4：数据清洗
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
-python scripts/export/clean_and_export.py \
+python "$SKILL_DIR/scripts/export/clean_and_export.py" \
   --output "$DATA_DIR/subjects/{keyword}/jobs_clean.xlsx"
 ```
 

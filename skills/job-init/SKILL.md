@@ -10,7 +10,14 @@ allowed-tools: Bash(*), Read, Write, Edit, Glob
 ## Phase 0：状态检测
 
 ```bash
-DATA_DIR="${AI_JOB_HUNTER_DATA:-../ai-job-hunter-data}"
+# === 自动发现 skill 根目录（适配项目级/全局级安装） ===
+SKILL_DIR="${AI_JOB_HUNTER_DIR:-}"
+[ -n "$SKILL_DIR" ] && SKILL_DIR="${SKILL_DIR//\\//}"
+if [ -z "$SKILL_DIR" ]; then
+  [ -d ".claude/skills/ai-job-hunter" ] && SKILL_DIR=".claude/skills/ai-job-hunter"
+  [ -z "$SKILL_DIR" ] && [ -d "$HOME/.claude/skills/ai-job-hunter" ] && SKILL_DIR="$HOME/.claude/skills/ai-job-hunter"
+fi
+DATA_DIR="${AI_JOB_HUNTER_DATA:-$(dirname "$SKILL_DIR")/ai-job-hunter-data}"
 test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ```
 
@@ -79,7 +86,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 
 ## Phase 2.5：起点档位判定
 
-读 `../../shared-references/role-tiers.md`，结合 `tech_stack`、`ai_experience_level`、`self_drive_score` 判定 S0-S3。
+读 SKILL_DIR 下的 `shared-references/role-tiers.md`，结合 `tech_stack`、`ai_experience_level`、`self_drive_score` 判定 S0-S3。
 
 规则：
 - AI 领域资深从业者 / 自驱力 5 分 / 有项目经验 → 倾向于 S3
@@ -117,7 +124,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 
 ## Phase 3：写入状态文件
 
-读取 `../../templates/state.template.json` 填充数据。
+读取 SKILL_DIR 下的 `templates/state.template.json` 填充数据。
 
 ```bash
 date '+%Y-%m-%d %H:%M %Z %z'
