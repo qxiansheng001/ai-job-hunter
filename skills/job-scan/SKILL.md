@@ -45,6 +45,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 - 岗位名称必须是真实市场上存在的
 - 匹配度基于：技术栈重合度、学历门槛、经验要求
 - 推荐理由要具体，诚实指出局限
+- 排除"实习/实习生"类岗位，只推荐正式/校招岗位
 
 ## Step 2：用户选择
 

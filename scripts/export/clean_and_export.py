@@ -81,6 +81,13 @@ def clean_data(raw_path, output_path):
     df = df.drop_duplicates(subset=["岗位名称", "公司名称"], keep="first")
     after = len(df)
 
+    # 过滤实习岗位
+    before_filter = len(df)
+    df = df[~df["岗位名称"].str.contains("实习", na=False)]
+    after_filter = len(df)
+    if before_filter != after_filter:
+        emit("clean.filter_intern", f"已过滤 {before_filter - after_filter} 个实习岗位")
+
     # 写入 Excel（带格式）
     df.to_excel(output_path, index=False, sheet_name="AI岗位数据",
                 engine="openpyxl")

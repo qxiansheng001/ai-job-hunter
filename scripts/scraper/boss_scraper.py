@@ -386,6 +386,9 @@ class BossScraper:
                 seen.add(key)
                 deduped.append(it)
 
+        # 过滤实习岗位
+        deduped = [it for it in deduped if "实习" not in it.get("title", "")]
+
         return deduped[:max_items], diag
 
     async def scrape_details(self, items, max_details=50):
