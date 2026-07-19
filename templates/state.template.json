@@ -1,0 +1,69 @@
+{
+  "schema_version": 2,
+  "created_at": "",
+  "created_at_full": "",
+  "timezone_id": "Asia/Shanghai",
+  "timezone_label": "中国标准时间",
+  "profile": {
+    "start_tier": "",
+    "tier_reason": "",
+    "tech_stack": [],
+    "transferable": [],
+    "education": {
+      "degree": "",
+      "major": ""
+    },
+    "identity": "",
+    "experience_years": null,
+    "weekly_hours": null,
+    "daily_hours": "",
+    "months_can_commit": null,
+    "learning_self_rating": "",
+    "ai_experience": "",
+    "ai_experience_level": "",
+    "ai_projects": "",
+    "commitment_period": "",
+    "self_drive_score": null,
+    "strength_tags": [],
+    "advantage_tags": [],
+    "preferred_platforms": [],
+    "region": "",
+    "target_city": "",
+    "target_cities": [],
+    "target_salary": "",
+    "urgency": "",
+    "status": "",
+    "notes": "",
+    "create_time": "",
+    "update_time": ""
+  },
+  "job_search": {
+    "keyword": "",
+    "city": "",
+    "city_code": "",
+    "status": "not_started",
+    "total_jobs": 0,
+    "clean_file": "",
+    "completed_at": null
+  },
+  "analysis": {
+    "report_title": "",
+    "report_file": "",
+    "generated_at": null
+  },
+  "learning_plan": {
+    "target_role": "",
+    "plan_file": "",
+    "generated_at": null,
+    "progress": {
+      "current_phase": 1,
+      "current_week": 1,
+      "current_day": 1,
+      "status": "not_started",
+      "completed_tasks": [],
+      "blocked_on": [],
+      "next_action": ""
+    }
+  },
+  "retro_log": []
+}

@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp scripts (one-off fix scripts)
+_*.py
+
+# Data temp
+data/temp/
+
+# System
+*.bat
+
+# Personal data — moved outside skill dir via AI_JOB_HUNTER_DATA
+workspace/
+subjects/
+.skill-state.json
+settings.local.json
