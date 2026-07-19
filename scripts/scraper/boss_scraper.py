@@ -332,6 +332,17 @@ class BossScraper:
 
     # ── 公开接口 ──
 
+    async def _deduplicate(self, items):
+        """内部去重 + 过滤实习岗位"""
+        seen = set()
+        deduped = []
+        for it in items:
+            key = it.get("link", "") or (it.get("title", "") + "|" + it.get("company", ""))
+            if key not in seen:
+                seen.add(key)
+                deduped.append(it)
+        return [it for it in deduped if "实习" not in it.get("title", "")]
+
     async def scrape_list(self, keyword, city="100010000", max_items=50, max_pages=3):
         """抓取搜索结果列表，返回 (items, diagnostics)"""
         items = []
@@ -377,19 +388,60 @@ class BossScraper:
                 diag["total_raw"] += len(page_items)
                 items.extend(page_items)
 
-        # 去重
-        seen = set()
-        deduped = []
-        for it in items:
-            key = it.get("link", "") or (it.get("title", "") + "|" + it.get("company", ""))
-            if key not in seen:
-                seen.add(key)
-                deduped.append(it)
-
-        # 过滤实习岗位
-        deduped = [it for it in deduped if "实习" not in it.get("title", "")]
-
+        deduped = await self._deduplicate(items)
         return deduped[:max_items], diag
+
+    async def scrape_keywords(self, keywords, city="100010000", max_items=50, max_pages=3):
+        """多关键词搜索，合并去重。
+
+        依次搜索每个关键词，跨关键词全局去重。
+        单个关键词失败不影响其他关键词。
+
+        Args:
+            keywords: 关键词列表
+            city: 城市编码
+            max_items: 合并后最大条数
+            max_pages: 每个关键词最大翻页数
+
+        Returns:
+            (merged_items, total_diagnostics)
+        """
+        all_items = []
+        diag = {"keywords_searched": 0, "keywords_failed": 0, "total_raw": 0}
+
+        emit("scraper.multi_keyword.start", f"多关键词搜索开始: {keywords}",
+             data={"keyword_count": len(keywords), "city": city})
+
+        for i, kw in enumerate(keywords):
+            emit("scraper.multi_keyword.progress",
+                 f"正在搜索关键词 ({i+1}/{len(keywords)}): {kw}",
+                 data={"keyword": kw, "index": i + 1, "total": len(keywords)})
+
+            try:
+                items, _ = await self.scrape_list(kw, city, max_items, max_pages)
+                if items:
+                    all_items.extend(items)
+                    diag["keywords_searched"] += 1
+                    diag["total_raw"] += len(items)
+                else:
+                    diag["keywords_searched"] += 1
+                    emit("scraper.multi_keyword.empty",
+                         f"关键词无结果: {kw}", status="warn")
+            except Exception as e:
+                diag["keywords_failed"] += 1
+                emit("scraper.multi_keyword.skip",
+                     f"关键词搜索失败: {kw} - {e}",
+                     status="warn", warnings=[str(e)], stream=sys.stderr)
+                continue
+
+        merged = await self._deduplicate(all_items)
+        merged = merged[:max_items]
+
+        emit("scraper.multi_keyword.done",
+             f"多关键词搜索完成: {len(merged)} 条（去重后）",
+             data={"merged_count": len(merged), "raw_count": len(all_items), "diag": diag})
+
+        return merged, diag
 
     async def scrape_details(self, items, max_details=50):
         """顺序抓取详情页 JD 文本"""
@@ -433,7 +485,8 @@ class BossScraper:
 
 async def main():
     parser = argparse.ArgumentParser(description="BOSS直聘 CDP 爬虫")
-    parser.add_argument("--keyword", required=True, help="搜索关键词")
+    parser.add_argument("--keyword", help="搜索关键词（与 --keywords 二选一）")
+    parser.add_argument("--keywords", help="多关键词搜索，逗号分隔（与 --keyword 二选一）")
     parser.add_argument("--city", default="100010000", help="城市编码，默认全国")
     parser.add_argument("--port", type=int, default=9222, help="Chrome CDP 端口")
     parser.add_argument("--max-items", type=int, default=50, help="最大抓取条数（不足则全取）")
@@ -447,9 +500,20 @@ async def main():
 
     scraper = BossScraper(port=args.port)
 
-    # 1. 连接
-    emit("init", f"正在启动 boss_scraper，关键词: {args.keyword}",
-         data={"argv": sys.argv, "cwd": os.getcwd()})
+    # 解析关键词：--keywords 优先，--keyword 兜底
+    if args.keywords:
+        keywords = [kw.strip() for kw in args.keywords.split(",") if kw.strip()]
+    elif args.keyword:
+        keywords = [args.keyword.strip()]
+    else:
+        emit("fatal", "请提供 --keyword 或 --keywords 参数", status="error",
+             error={"code": "MISSING_KEYWORD", "traceback": ""})
+        await scraper.close()
+        sys.exit(1)
+
+    keyword_label = "、".join(keywords)
+    emit("init", f"正在启动 boss_scraper，关键词: {keyword_label}",
+         data={"argv": sys.argv, "cwd": os.getcwd(), "keywords": keywords})
     emit("scraper.connect", f"正在连接 Chrome（端口 {args.port}）...")
     result = await scraper.connect()
     if "error" in result:
@@ -459,15 +523,20 @@ async def main():
         sys.exit(1)
 
     # 2. 抓取列表
-    keyword_label = args.keyword
     emit("scraper.list.start", f"正在搜索「{keyword_label}」...")
 
-    items, diag = await scraper.scrape_list(
-        args.keyword, args.city, args.max_items
-    )
+    if len(keywords) > 1:
+        items, diag = await scraper.scrape_keywords(
+            keywords, args.city, args.max_items
+        )
+    else:
+        items, diag = await scraper.scrape_list(
+            keywords[0], args.city, args.max_items
+        )
 
     output = {
-        "keyword": args.keyword,
+        "keyword": keywords[0],
+        "keywords": keywords,
         "city": args.city,
         "scraped_at": datetime.now().isoformat(),
         "status": "success",

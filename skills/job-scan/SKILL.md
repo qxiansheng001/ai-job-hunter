@@ -54,7 +54,31 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 1. 向用户确认搜索参数：岗位名称、城市（来自画像）、抓取数量（建议 50 条）
 2. 将 `keyword` 和 `city` 写入 `$DATA_DIR/.skill-state.json` 的 `job_search` 字段
 
-## Step 3：BOSS 直聘抓取
+## Step 3A：关键词扩展（模糊匹配）
+
+使用 `job_aliases.py` 将用户选择的岗位名称扩展为中英文同义词，提高搜索结果覆盖率。
+
+```bash
+python -c "
+import sys
+sys.path.insert(0, '$SKILL_DIR/scripts')
+from utils.job_aliases import expand_keywords
+result = expand_keywords('{用户选择的岗位名称}')
+for kw in result:
+    print(kw)
+"
+```
+
+将输出结果收集为逗号分隔的关键词列表。向用户展示即将搜索的所有相关岗位名称。
+
+例如：
+> 将搜索以下相关岗位名称：
+> - prompt engineer
+> - 提示词工程师
+> - prompt工程师
+> - AI提示词工程师
+
+## Step 3B：BOSS直聘抓取（多关键词）
 
 ### 前置检查
 
@@ -107,27 +131,99 @@ print('TIMEOUT')
 
 ### 执行抓取
 
+使用扩展后的关键词列表，通过 `--keywords` 参数传入（逗号分隔，无需空格）：
+
 ```bash
 python "$SKILL_DIR/scripts/scraper/boss_scraper.py" \
-  --keyword "{岗位名称}" \
+  --keywords "{关键词1},{关键词2},{关键词3}" \
   --city "{城市编码（全国 100010000，北京 101010100）}" \
   --max-items 50
 ```
 
-城市编码参考 SKILL_DIR 下的 `shared-references/city_codes.md`（如果存在）或使用常用编码。
+城市编码参考 SKILL_DIR 下的 `shared-references/city_codes.md`。
 
 ### 抓取结果
 
 完成后告知用户抓取数量，更新 `$DATA_DIR/.skill-state.json` 的 `job_search` 字段。
 
-## Step 4：数据清洗
+## Step 4A：数据清洗 + 条数检查
 
 ```bash
 python "$SKILL_DIR/scripts/export/clean_and_export.py" \
-  --output "$DATA_DIR/subjects/{keyword}/jobs_clean.xlsx"
+  --output "$DATA_DIR/subjects/{keyword}/jobs_clean.xlsx" \
+  --min-count 25
 ```
 
+记录命令的 exit code（`$?`）：
+- **exit code 0** → 清洗后的数据 ≥ 25 条，跳到 Step 5
+- **exit code 2** → 清洗后的数据 < 25 条，继续 Step 4B 跨省份扩展
+- **其他 exit code** → 报错退出
+
 更新 `$DATA_DIR/.skill-state.json`：`job_search.status=done`、`clean_file=$DATA_DIR/subjects/{keyword}/jobs_clean.xlsx`。
+
+## Step 4B：跨省份扩展搜索
+
+**仅在 Step 4A exit code 为 2 时执行。**
+
+### 4B-1：分析当前省份和计划扩展省份
+
+```bash
+python -c "
+import sys, json
+sys.path.insert(0, '$SKILL_DIR/scripts')
+from utils.province_map import get_province_name, get_expansion_provinces
+cur = get_province_name('{城市编码}')
+provinces = get_expansion_provinces('{城市编码}', 3)
+print(json.dumps({'current_province': cur, 'expansion': provinces}, ensure_ascii=False))
+"
+```
+
+### 4B-2：向用户展示并确认
+
+根据上一步输出，向用户展示：
+
+> 当前省份「{省份名}」仅找到 {数量} 条岗位信息（目标 25 条）。
+> 计划扩展搜索以下省份：{省份1}、{省份2}、{省份3}
+> 是否继续跨省搜索？（是/否）
+
+等待用户明确回复。如果用户拒绝，则告知用户数据不足，流程结束。
+
+### 4B-3：逐省搜索
+
+用户确认后，对每个扩展省份：
+
+1. 使用该省份的代表城市编码
+2. 使用相同的多关键词（`--keywords`）
+3. 设置 `--max-items 30`（每省少抓些）
+4. 将原始数据保存到不同临时文件
+
+```bash
+python "$SKILL_DIR/scripts/scraper/boss_scraper.py" \
+  --keywords "{关键词1},{关键词2},{关键词3}" \
+  --city "{省份代表城市编码}" \
+  --max-items 30 \
+  --output "{临时目录}/{省份名}_raw.json"
+```
+
+### 4B-4：合并数据
+
+将各省份的原始数据与最初的原始数据合并为一个 JSON 文件：
+
+- 合并 `list_items` 数组
+- 合并 `detail_items` 数组
+- 对 `link` 进行全局去重
+- 写入合并后的 `raw_data.json`
+
+### 4B-5：重新清洗
+
+```bash
+python "$SKILL_DIR/scripts/export/clean_and_export.py" \
+  --output "$DATA_DIR/subjects/{keyword}/jobs_clean.xlsx" \
+  --min-count 25
+```
+
+如果仍然不足 25 条，告知用户实际数量，流程继续（不强求达到 25 条）。
+如果已足够或有更多省份待搜索，可继续扩展。
 
 ## Step 5：下一步
 

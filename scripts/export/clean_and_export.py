@@ -30,8 +30,8 @@ except ImportError:
     emit_fatal("DEP_OPENPYXL", "缺少 openpyxl 库，请执行: pip install openpyxl")
 
 
-def clean_data(raw_path, output_path):
-    """主清洗流程"""
+def clean_data(raw_path, output_path, min_count=25):
+    """主清洗流程，返回 (success, clean_count)"""
     # 读取原始数据
     with open(raw_path, "r", encoding="utf-8") as f:
         raw = json.load(f)
@@ -43,7 +43,7 @@ def clean_data(raw_path, output_path):
 
     if not items:
         emit("clean.empty", "没有数据可清洗", status="warn")
-        return False
+        return False, 0
 
     # 构建详情查找表：url → detail
     detail_map = {}
@@ -87,6 +87,19 @@ def clean_data(raw_path, output_path):
     after_filter = len(df)
     if before_filter != after_filter:
         emit("clean.filter_intern", f"已过滤 {before_filter - after_filter} 个实习岗位")
+
+    clean_count = len(df)
+
+    # 检查是否达到最少条数要求
+    if clean_count < min_count:
+        emit("clean.insufficient",
+             f"清洗后仅 {clean_count} 条，未达到最低要求 {min_count} 条",
+             data={"clean_count": clean_count, "min_count": min_count})
+        # 仍然导出已有数据
+    else:
+        emit("clean.count_ok",
+             f"清洗后 {clean_count} 条，达到最低要求 {min_count} 条",
+             data={"clean_count": clean_count, "min_count": min_count})
 
     # 写入 Excel（带格式）
     df.to_excel(output_path, index=False, sheet_name="AI岗位数据",
@@ -143,9 +156,9 @@ def clean_data(raw_path, output_path):
     wb.save(output_path)
 
     emit("done",
-         f"清洗完成：{before} 条 → 去重后 {after} 条 → 已导出 {output_path}",
-         data={"input_rows": before, "after_dedup": after, "output": output_path})
-    return True
+         f"清洗完成：{before} 条 → 去重后 {after} 条 → 最终 {clean_count} 条 → 已导出 {output_path}",
+         data={"input_rows": before, "after_dedup": after, "clean_count": clean_count, "output": output_path})
+    return True, clean_count
 
 
 def main():
@@ -153,9 +166,16 @@ def main():
     default_input = os.path.join(tempfile.gettempdir(), "ai-job-hunter", "raw_data.json")
     parser.add_argument("--input", default=default_input, help="输入 raw_data.json 路径")
     parser.add_argument("--output", default="jobs_clean.xlsx", help="输出 .xlsx 路径")
+    parser.add_argument("--min-count", type=int, default=25, help="最少有效数据条数，默认 25")
     args = parser.parse_args()
 
-    clean_data(args.input, args.output)
+    success, clean_count = clean_data(args.input, args.output, min_count=args.min_count)
+
+    if not success:
+        sys.exit(1)
+
+    if clean_count < args.min_count:
+        sys.exit(2)
 
     # 清理中间文件
     temp_dir = os.path.join(tempfile.gettempdir(), "ai-job-hunter")
