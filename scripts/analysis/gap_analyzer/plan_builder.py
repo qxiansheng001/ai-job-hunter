@@ -1,12 +1,12 @@
 """学习计划构建器：连续知识单元，弹性编排 + 均匀穿插"""
 
 from analysis.skill_map import (
-    SKILL_TO_THEME, WEEK_PHASE_MAP, THEME_PREREQUISITES, PROJECT_SCALE,
+    resolve_skill_to_theme, WEEK_PHASE_MAP, THEME_PREREQUISITES, PROJECT_SCALE,
     SUPPLEMENT_POOL,
 )
 from analysis.content_generator import generate_plan_content
 from analysis.gap_analyzer.core import _merge_into_calendar_days, _generate_filler_blocks
-from utils.time import _parse_hours_float, _parse_hours, _compute_time_coefficient
+from utils.time import _parse_hours_float, _parse_hours, _compute_time_coefficient, get_day_target
 
 # 开源实践：递进式任务（按序循环使用）
 _OS_DAYS = [
@@ -99,7 +99,7 @@ def build_market_driven_plan(market_skills, supplement_candidates, duration, pro
     plan_entries = []
     used_themes = set()
     for ms in to_learn:
-        theme = SKILL_TO_THEME.get(ms["name"])
+        theme = resolve_skill_to_theme(ms["name"])
         if theme and theme not in used_themes:
             plan_entries.append({"theme": theme, "mention_rate": ms["mention_rate"], "source": ms["source"]})
             used_themes.add(theme)
@@ -232,7 +232,7 @@ def build_continuous_plan(market_skills, supplement_candidates, duration, profil
     themes_in_order = []
     theme_map = {}
     for ms in selected_ms:
-        theme = SKILL_TO_THEME.get(ms["name"])
+        theme = resolve_skill_to_theme(ms["name"])
         if theme and theme not in themes_in_order:
             themes_in_order.append(theme)
             theme_map[theme] = ms
@@ -446,37 +446,49 @@ def build_continuous_plan(market_skills, supplement_candidates, duration, profil
                 "goal": f"将「{project_ref}」项目完善为开源作品", "os_num": os_items_added,
             })
 
-    # 8. 弹性打包：将 sequence 分配到日历天，使用 base_hours 打包（不缩放）
-    target_h = daily_h
-    min_h = target_h * 0.75
-    max_h = target_h * 1.25
+    # 8. 弹性打包（节奏感知）：将 sequence 分配到日历天
+    pace_config = gap_data.get("learning_pace", {"mode": "daily"})
+    is_flexible = pace_config.get("mode") == "flexible"
 
-    calendar_days = []
-    day_batch = []
-    day_hours = 0.0
+    target_h = daily_h  # 用于后续 _batch_to_calendar_day()，flexible 模式下也使用日均值
+    if is_flexible:
+        # 灵活模式：不按天打包，每个 item 独立为一个"段"
+        calendar_days = [[item] for item in sequence]
+        total_calendar_days = len(calendar_days)
+    else:
+        calendar_days = []
+        day_batch = []
+        day_hours = 0.0
+        day_index = 1  # 用于 weekend 模式计算周几
 
-    for item in sequence:
-        item_h = item["base_hours"]  # 不缩放，直接用基础时长
+        for item in sequence:
+            item_h = item["base_hours"]
+            if pace_config.get("mode") == "weekend":
+                target_h = get_day_target(pace_config, day_index)
+            min_h = target_h * 0.75
+            max_h = target_h * 1.25
 
-        if not day_batch:
-            day_batch = [item]
-            day_hours = item_h
-        elif day_hours + item_h <= max_h:
-            day_batch.append(item)
-            day_hours += item_h
-            if day_hours >= min_h:
+            if not day_batch:
+                day_batch = [item]
+                day_hours = item_h
+            elif day_hours + item_h <= max_h:
+                day_batch.append(item)
+                day_hours += item_h
+                if day_hours >= min_h:
+                    calendar_days.append(day_batch)
+                    day_batch = []
+                    day_hours = 0.0
+                    day_index += 1
+            else:
                 calendar_days.append(day_batch)
-                day_batch = []
-                day_hours = 0.0
-        else:
+                day_batch = [item]
+                day_hours = item_h
+                day_index += 1
+
+        if day_batch:
             calendar_days.append(day_batch)
-            day_batch = [item]
-            day_hours = item_h
 
-    if day_batch:
-        calendar_days.append(day_batch)
-
-    total_calendar_days = len(calendar_days)
+        total_calendar_days = len(calendar_days)
 
     # 9. 与 duration 对齐，用温和的填补防止计划过短
     #   条件：核心技能覆盖 ≥80% 且内容天数不足 55% 目标时，插入适量填充
@@ -666,6 +678,7 @@ def build_continuous_plan(market_skills, supplement_candidates, duration, profil
         "essential_covered": essential_covered,
         "bonus_count": len(all_bonus),
         "bonus_covered": bonus_covered,
+        "is_flexible": is_flexible,
     }
 
 

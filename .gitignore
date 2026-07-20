@@ -16,4 +16,9 @@ data/temp/
 workspace/
 subjects/
 .skill-state.json
-settings.local.json
+settings.local.jsonai-job-hunter-data/
+scripts/subjects/
+__pycache__/
+*.pyc
+.ai-job-hunter-chrome/
+cheat-on-skill/

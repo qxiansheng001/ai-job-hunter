@@ -20,6 +20,8 @@ from datetime import datetime
 
 import pandas as pd
 
+from utils.claude_helper import claude_available, call_claude
+
 try:
     import jieba
     import jieba.analyse
@@ -490,12 +492,194 @@ def generate_report(stats, title):
     return "\n".join(lines)
 
 
+# ── Claude 分析模式 ──
+
+_CLAUDE_JD_SYSTEM = """你是一位中文招聘数据分析专家。分析岗位描述(JD)数据，提取结构化市场洞察。
+
+你的输出必须严格遵循 JSON 格式。"""
+
+
+def _build_jd_analysis_prompt(title, jd_texts):
+    """构造 Claude JD 分析 prompt。"""
+    total = len(jd_texts)
+    # 截断长文本以防超 token 限制
+    truncated = []
+    for i, t in enumerate(jd_texts):
+        if len(t) > 3000:
+            t = t[:3000] + f"\n...（原文共{len(t)}字符，已截断）"
+        truncated.append(t)
+
+    texts_json = json.dumps(
+        [{"id": i + 1, "text": t} for i, t in enumerate(truncated)],
+        ensure_ascii=False,
+    )
+
+    return f"""以下是 {total} 条「{title}」岗位的 JD 文本数据，请分析并返回 JSON。
+
+返回 JSON 结构必须严格遵循以下格式：
+
+```json
+{{
+  "hard_skills": [
+    {{"name": "技能名称", "count": 出现次数, "mention_rate": 百分比(0-100)}}
+  ],
+  "skill_categories": {{
+    "编程语言": ["Python", "Java", ...],
+    "AI/ML框架": ["PyTorch", "TensorFlow", ...],
+    "大模型/LLM": ["大模型", "GPT", "LangChain", ...],
+    "云原生/DevOps": ["Docker", "Kubernetes", ...],
+    "数据库/中间件": ["MySQL", "Redis", ...],
+    "大数据": ["Spark", "Flink", ...],
+    "视觉/CV": ["OpenCV", "YOLO", ...],
+    "NLP": ["NLP", "分词", ...]
+  }},
+  "education_stats": {{"博士": N, "硕士": N, "本科": N, "大专": N, "学历不限": N}},
+  "experience_stats": {{"经验要求描述": 出现次数}},
+  "soft_skills": [{{"name": "软技能名", "count": 出现次数}}],
+  "top_companies": [{{"name": "公司名", "count": 招聘数量}}],
+  "industry_insight": "2-3句行业观察（中文）"
+}}
+```
+
+关键规则：
+1. hard_skills 中每个技能只出现一次，count 为在多少条 JD 中提到
+2. mention_rate = round(count / {total} * 100, 1)
+3. 语义归类：\"熟悉GPT/Claude/文心一言\" → 归为\"大模型\"；\"了解Agent/Function Calling\" → 归为\"Agent\"
+4. education_stats 数量加起来应 ≤ {total}（不是所有 JD 都写学历要求）
+5. 所有文本用中文
+6. 只返回 JSON，不要额外说明
+
+JD 数据：
+{texts_json}"""
+
+
+def _claude_output_to_stats(claude_result, df, title):
+    """将 Claude 返回的 JSON 转换为与 analyze_jds() 兼容的 stats dict。"""
+    total_jobs = len(df)
+
+    # 构建 skill_stats（分类字典）
+    skill_cats = claude_result.get("skill_categories", {})
+    hard_skills = claude_result.get("hard_skills", [])
+    skill_name_to_rate = {s["name"]: s.get("mention_rate", 0) for s in hard_skills}
+    skill_name_to_count = {s["name"]: s.get("count", 0) for s in hard_skills}
+
+    skill_stats = {}
+    for cat, skills in skill_cats.items():
+        cat_dict = {}
+        for sk in skills:
+            cnt = skill_name_to_count.get(sk, 0)
+            if cnt > 0:
+                cat_dict[sk] = cnt
+        if cat_dict:
+            skill_stats[cat] = dict(
+                sorted(cat_dict.items(), key=lambda x: -x[1])
+            )
+
+    # mention_rates
+    mention_rates = {}
+    for s in hard_skills:
+        mention_rates[s["name"]] = s.get("mention_rate", 0)
+
+    # essential / bonus
+    essential = [(s["name"], s.get("mention_rate", 0))
+                 for s in hard_skills if s.get("mention_rate", 0) >= 30.0]
+    bonus = [(s["name"], s.get("mention_rate", 0))
+             for s in hard_skills if 10.0 <= s.get("mention_rate", 0) < 30.0]
+
+    # soft skills
+    soft_skills = {}
+    for s in claude_result.get("soft_skills", []):
+        soft_skills[s["name"]] = s.get("count", 0)
+
+    # education
+    edu_stats = claude_result.get("education_stats", {})
+    exp_stats = claude_result.get("experience_stats", {})
+
+    # company stats
+    companies = claude_result.get("top_companies", [])
+
+    # overview
+    overview = {
+        "total_jobs": total_jobs,
+        "total_companies": len(companies),
+        "job_column": "JD摘要",
+    }
+    if "岗位名称" in df.columns:
+        titles = df["岗位名称"].astype(str)
+        overview["intern_count"] = int(
+            titles.str.contains("实习", na=False).sum()
+        )
+        overview["formal_count"] = total_jobs - overview["intern_count"]
+    if "工作地点" in df.columns:
+        location_counts = (
+            df["工作地点"].value_counts().head(10).to_dict()
+        )
+        overview["top_locations"] = {
+            str(k): int(v) for k, v in location_counts.items()
+        }
+    if "公司名称" in df.columns:
+        from collections import Counter as C2
+        real_companies = df["公司名称"].dropna().astype(str)
+        cc = C2(real_companies).most_common(15)
+        overview["top_companies"] = [(str(c), int(n)) for c, n in cc]
+
+    total_jd_chars = int(df.astype(str).sum(axis=1).str.len().sum())
+
+    return {
+        "overview": overview,
+        "word_freq_top": {},
+        "tfidf_top": {},
+        "skill_stats": skill_stats,
+        "soft_skills": soft_skills,
+        "edu_stats": edu_stats,
+        "exp_stats": exp_stats,
+        "total_jd_chars": total_jd_chars,
+        "mention_rates": mention_rates,
+        "essential_skills": essential,
+        "bonus_skills": bonus,
+    }
+
+
+def analyze_jds_with_claude(df, title):
+    """使用 Claude 分析 JD 数据，返回与 analyze_jds() 兼容的 stats dict。"""
+    jd_col = find_jd_column(df)
+    jd_texts = df[jd_col].astype(str).tolist()
+
+    # 过滤太短的文本
+    jd_texts = [t for t in jd_texts if len(t.strip()) > 20]
+
+    prompt = _build_jd_analysis_prompt(title, jd_texts)
+
+    result = call_claude(
+        system_prompt=_CLAUDE_JD_SYSTEM,
+        user_prompt=prompt,
+        response_schema={
+            "type": "object",
+            "properties": {
+                "hard_skills": {"type": "array"},
+                "skill_categories": {"type": "object"},
+                "education_stats": {"type": "object"},
+                "experience_stats": {"type": "object"},
+                "soft_skills": {"type": "array"},
+                "top_companies": {"type": "array"},
+                "industry_insight": {"type": "string"},
+            },
+        },
+    )
+
+    if result is None:
+        return None
+
+    return _claude_output_to_stats(result, df, title)
+
+
 def main():
     parser = argparse.ArgumentParser(description="JD 数据分析与报告生成")
     parser.add_argument("--input", required=True, help="输入文件路径（xlsx/csv/txt）")
     parser.add_argument("--title", default="", help="岗位名称（默认从文件名推断）")
     parser.add_argument("--output", default="", help="输出报告路径（默认自动生成）")
     parser.add_argument("--data-dir", default="", help="数据目录（默认从 AI_JOB_HUNTER_DATA 环境变量读取）")
+    parser.add_argument("--use-claude", action="store_true", help="使用 Claude API 进行语义分析（需设置 ANTHROPIC_API_KEY）")
     args = parser.parse_args()
 
     data_dir = args.data_dir or os.environ.get("AI_JOB_HUNTER_DATA", "")
@@ -509,20 +693,27 @@ def main():
     title = args.title
     if not title:
         basename = os.path.splitext(os.path.basename(args.input))[0]
-        # 尝试从文件名推断
         title = basename.replace("jobs_clean", "").replace("_", "").strip()
         if not title:
             title = "未知岗位"
     print(json.dumps({"step": "title", "title": title}, ensure_ascii=False))
 
-    # 构建种子词库
-    print(json.dumps({"step": "seeds", "message": "正在构建关键词种子库..."}, ensure_ascii=False))
-    seeds = build_seed_keywords(title)
-    print(json.dumps({"step": "seeds_done", "seeds_count": len(seeds)}, ensure_ascii=False))
-
     # 分析
-    print(json.dumps({"step": "analyze", "message": "正在分析 JD 文本..."}, ensure_ascii=False))
-    stats = analyze_jds(df, title, seeds)
+    use_claude = args.use_claude and claude_available()
+
+    if use_claude:
+        print(json.dumps({"step": "analyze", "message": "正在调用 Claude 进行 JD 语义分析..."}, ensure_ascii=False))
+        stats = analyze_jds_with_claude(df, title)
+        if stats is None:
+            print(json.dumps({"step": "analyze_fallback", "message": "Claude 分析失败，回退到 jieba 模式..."}, ensure_ascii=False))
+            seeds = build_seed_keywords(title)
+            stats = analyze_jds(df, title, seeds)
+    else:
+        if args.use_claude and not claude_available():
+            print(json.dumps({"step": "claude_unavailable", "message": "ANTHROPIC_API_KEY 未设置，使用 jieba 模式"}, ensure_ascii=False))
+        print(json.dumps({"step": "analyze", "message": "正在使用 jieba 分析 JD 文本..."}, ensure_ascii=False))
+        seeds = build_seed_keywords(title)
+        stats = analyze_jds(df, title, seeds)
 
     # 生成报告
     print(json.dumps({"step": "report", "message": "正在生成报告..."}, ensure_ascii=False))

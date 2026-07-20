@@ -95,6 +95,9 @@ def generate_preview_json(profile_data, report_data, gap_data, title, duration, 
     bonus_list = [{"name": ms["name"], "mention_rate": ms.get("mention_rate", 0), "user_has": ms.get("user_has", False)} for ms in market_skills if ms.get("source") == "bonus"]
 
     plan_model = "continuous" if (bool(market_skills) and duration >= 30) else "week-based"
+    pace = gap_data.get("learning_pace", {})
+    pace_mode = pace.get("mode", "daily")
+    pace_labels = {"daily": "日常模式（均匀分配）", "weekend": "周末攻坚（周中轻量+周末集中）", "flexible": "灵活模式（任务清单）"}
 
     # 预览模式不执行完整计划构建（build_continuous_plan 仅在 generate_daily_plan 中调用一次）
     return {
@@ -102,6 +105,8 @@ def generate_preview_json(profile_data, report_data, gap_data, title, duration, 
         "duration": duration, "total_days": duration,
         "weekly_hours": p.get("weekly_hours", ""),
         "intensity": gap_data.get("hours_tier", "标准"),
+        "learning_pace": pace_labels.get(pace_mode, "日常模式"),
+        "learning_pace_mode": pace_mode,
         "daily_hours": round(gap_data.get("daily_hours", 0), 1),
         "daily_hours_display": _format_hours_display(round(gap_data.get("daily_hours", 0), 1)),
         "ai_experience_level": p.get("ai_experience_level", "未知"),
@@ -189,6 +194,14 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
     lines.append(f"> - **AI 经验等级**: {exp_level} → 学习起点：{gap_data.get('experience_start_point', 'Phase 1 Week 1')}")
     if wh_range:
         lines.append(f"> - **每周投入**: {wh_range} → 日均约 {daily_actual:.1f}h → 任务强度：{intensity}")
+    pace = gap_data.get("learning_pace", {})
+    pace_mode = pace.get("mode", "daily")
+    if pace_mode == "weekend":
+        lines.append(f"> - **学习节奏**: 周末攻坚（周中 {pace.get('weekday_hours', 2)}h/天 → 周末 {pace.get('weekend_hours', 4)}h/天）")
+    elif pace_mode == "flexible":
+        lines.append(f"> - **学习节奏**: 灵活模式（任务清单，自定进度）")
+    else:
+        lines.append(f"> - **学习节奏**: 日常模式（每天 {pace.get('daily_hours', daily_actual):.1f}h 均匀分配）")
     if sd_score is not None:
         lines.append(f"> - **自驱力评分**: {sd_score}/5 → 监督提醒：{sd_label}")
     if strengths:
@@ -332,6 +345,7 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
     use_continuous = bool(market_skills) and duration >= 30
     simple_mode = (duration <= 30)
     is_market_driven = bool(market_skills)
+    is_flexible_plan = False  # may be overridden in continuous plan
     selected_phases = []
     covered_skill_names = set()
     plan_structure = None
@@ -339,32 +353,51 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
     if use_continuous:
         plan_structure = build_continuous_plan(market_skills, supp_candidates, duration, profile, gap_data)
         kus = plan_structure["knowledge_units"]
+        is_flexible_plan = plan_structure.get("is_flexible", False)
 
         lines.append("### 学习概览")
         lines.append("")
-        lines.append(f"本计划共 {plan_structure['total_days']} 天（日均{_format_hours_display(daily_h)}，"
-                     f"每日可在 {_format_hours_display(daily_h*0.75)}~{_format_hours_display(daily_h*1.25)} 之间弹性浮动），"
-                     f"含 {len(plan_structure.get('projects', []))} 个实战项目")
-        lines.append("")
-        lines.append("| 时间段 | 内容 | 类型 | 预计投入 |")
-        lines.append("|--------|------|------|---------|")
-        for item in plan_structure["learning_overview"]:
-            lines.append(f"| {item['day_range']} | {item['title']} | {item['type']} | {item['estimated_hours']}h |")
+        if is_flexible_plan:
+            total_tasks = plan_structure['total_days']
+            lines.append(f"本计划共 {total_tasks} 个学习任务（灵活模式，自定进度），"
+                         f"含 {len(plan_structure.get('projects', []))} 个实战项目")
+            lines.append("")
+            lines.append("> 灵活模式下不排具体日期。你可以按自己的节奏，每天选 2-4h 的任务完成。")
+            lines.append("")
+            lines.append("| 内容 | 类型 | 预计投入 |")
+            lines.append("|------|------|---------|")
+            for item in plan_structure["learning_overview"]:
+                lines.append(f"| {item['title']} | {item['type']} | {item['estimated_hours']}h |")
+        else:
+            lines.append(f"本计划共 {plan_structure['total_days']} 天（日均{_format_hours_display(daily_h)}，"
+                         f"每日可在 {_format_hours_display(daily_h*0.75)}~{_format_hours_display(daily_h*1.25)} 之间弹性浮动），"
+                         f"含 {len(plan_structure.get('projects', []))} 个实战项目")
+            lines.append("")
+            lines.append("| 时间段 | 内容 | 类型 | 预计投入 |")
+            lines.append("|--------|------|------|---------|")
+            for item in plan_structure["learning_overview"]:
+                lines.append(f"| {item['day_range']} | {item['title']} | {item['type']} | {item['estimated_hours']}h |")
         lines.append("")
 
         if plan_structure["projects"]:
             lines.append("### 实战项目清单")
             lines.append("")
             for proj in plan_structure["projects"]:
-                dr = f"Day {proj['day_start']}-{proj['day_end']}" if proj['day_start'] != proj['day_end'] else f"Day {proj['day_start']}"
-                lines.append(f"- **{proj['title']}**（{dr}，约{proj['total_hours']}h）")
+                if is_flexible_plan or proj.get("day_start", 0) == 0:
+                    lines.append(f"- **{proj['title']}**（约{proj['total_hours']}h）")
+                else:
+                    dr = f"Day {proj['day_start']}-{proj['day_end']}" if proj['day_start'] != proj['day_end'] else f"Day {proj['day_start']}"
+                    lines.append(f"- **{proj['title']}**（{dr}，约{proj['total_hours']}h）")
             lines.append("")
 
         if plan_structure["review_days"]:
             lines.append("### 复盘日计划")
             lines.append("")
             for rd in plan_structure["review_days"]:
-                lines.append(f"- Day {rd['day_start']}：{rd['title']}")
+                if is_flexible_plan:
+                    lines.append(f"- {rd['title']}")
+                else:
+                    lines.append(f"- Day {rd['day_start']}：{rd['title']}")
             lines.append("")
 
         last_phase_num = None
@@ -373,7 +406,12 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
             n_days = len(merged)
             if n_days == 0:
                 continue
-            dr = f"Day {ku['day_start']}" if n_days <= 1 else f"Day {ku['day_start']}-{ku['day_end']}"
+            if is_flexible_plan:
+                dr = ""
+            elif ku.get("day_start", 0) == 0:
+                dr = ""
+            else:
+                dr = f"Day {ku['day_start']}" if n_days <= 1 else f"Day {ku['day_start']}-{ku['day_end']}"
 
             unit_type_label = {
                 "study": "核心学习", "project": "项目实战", "review": "阶段复盘",
@@ -433,7 +471,17 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
 
                     lines.append("---")
                     lines.append("")
-                    header = f"##### Day {abs_day}：{topics_str} {tags_str} {topic_label}".strip()
+                    if is_flexible_plan:
+                        header = f"##### {topics_str} {tags_str} {topic_label}".strip()
+                    else:
+                        pace = gap_data.get("learning_pace", {})
+                        if pace.get("mode") == "weekend":
+                            labels = ["", "（周一）", "（周二）", "（周三）", "（周四）", "（周五）", "（周六）", "（周日）"]
+                            wd = ((abs_day - 1) % 7) + 1
+                        else:
+                            wd = 0
+                        day_suffix = labels[wd] if pace.get("mode") == "weekend" and wd > 0 else ""
+                        header = f"##### Day {abs_day}{day_suffix}：{topics_str} {tags_str} {topic_label}".strip()
                     lines.append(header)
                     lines.append("")
                     lines.append(f"- **今日学习时长**：{_format_hours_display(total_dur)}（平均值：{_format_hours_display(daily_h)}，弹性范围：{_format_hours_display(daily_h*0.75)}~{_format_hours_display(daily_h*1.25)}）")
@@ -501,7 +549,17 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
 
                     lines.append("---")
                     lines.append("")
-                    lines.append(f"##### Day {abs_day}：{topic}")
+                    if is_flexible_plan:
+                        lines.append(f"##### {topic}")
+                    else:
+                        pace = gap_data.get("learning_pace", {})
+                        if pace.get("mode") == "weekend":
+                            labels = ["", "（周一）", "（周二）", "（周三）", "（周四）", "（周五）", "（周六）", "（周日）"]
+                            wd = ((abs_day - 1) % 7) + 1
+                            day_suffix = labels[wd] if wd > 0 else ""
+                        else:
+                            day_suffix = ""
+                        lines.append(f"##### Day {abs_day}{day_suffix}：{topic}")
                     lines.append("")
                     lines.append(f"- **今日总学习时长**：{_format_hours_display(scaled_hours)}")
                     lines.append("- **时间分配**：")
@@ -881,19 +939,25 @@ def generate_daily_plan(profile, gap_data, title, duration=60, business=False, c
     lines.append("## 六、总时间线与关键建议")
     lines.append("")
     total_days_actual = plan_structure["total_days"] if use_continuous and plan_structure else duration
-    lines.append(f"- **总时长**：约 {total_days_actual} 天" + ("（含综合项目周）" if not use_continuous else "（含实战项目与复盘日）"))
+    if is_flexible_plan:
+        lines.append(f"- **总任务数**：约 {total_days_actual} 个学习任务（灵活模式，无固定日期）")
+    else:
+        lines.append(f"- **总时长**：约 {total_days_actual} 天" + ("（含综合项目周）" if not use_continuous else "（含实战项目与复盘日）"))
     lines.append(f"- **每日投入**：{p.get('daily_hours', '3-4h')}")
     if use_continuous and plan_structure:
         plan_projects = plan_structure.get("projects", [])
         if len(plan_projects) >= 1:
             p1 = plan_projects[0]
-            lines.append(f"- **里程碑 1**（Day {p1['day_start']}）：{p1['title']}")
+            p1_day = '' if is_flexible_plan else f"（Day {p1['day_start']}）"
+            lines.append(f"- **里程碑 1**{p1_day}：{p1['title']}")
         if len(plan_projects) >= 2:
             p2 = plan_projects[1]
-            lines.append(f"- **里程碑 2**（Day {p2['day_start']}）：{p2['title']}")
+            p2_day = '' if is_flexible_plan else f"（Day {p2['day_start']}）"
+            lines.append(f"- **里程碑 2**{p2_day}：{p2['title']}")
         if len(plan_projects) >= 3:
             p3 = plan_projects[2]
-            lines.append(f"- **里程碑 3**（Day {p3['day_start']}）：{p3['title']}")
+            p3_day = '' if is_flexible_plan else f"（Day {p3['day_start']}）"
+            lines.append(f"- **里程碑 3**{p3_day}：{p3['title']}")
     elif duration <= 30:
         lines.append("- **里程碑 1**（第 4 周）：完成 RAG 知识库问答系统")
         lines.append("- **里程碑 2**（第 5 周）：作品集就绪，可投实习")

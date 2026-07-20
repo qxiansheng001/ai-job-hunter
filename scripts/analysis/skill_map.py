@@ -208,6 +208,42 @@ SKILL_TO_THEME = _content.get("SKILL_TO_THEME") or {
 
 THEME_TO_SKILL = _content.get("THEME_TO_SKILL") or {v: k for k, v in SKILL_TO_THEME.items()}
 
+
+def resolve_skill_to_theme(skill_name):
+    """将技能名称映射到主题名称。支持精确匹配、模糊匹配和兜底。
+
+    这是 SKILL_TO_THEME.get() 的增强版，用于处理 Claude 返回的
+    可能不在映射表中的技能名称。
+    """
+    # 1. 精确匹配
+    if skill_name in SKILL_TO_THEME:
+        return SKILL_TO_THEME[skill_name]
+
+    # 2. 不区分大小写匹配
+    lower_name = skill_name.lower()
+    for k, v in SKILL_TO_THEME.items():
+        if k.lower() == lower_name:
+            return v
+
+    # 3. 包含关系匹配
+    for k, v in SKILL_TO_THEME.items():
+        kl = k.lower()
+        if kl in lower_name or lower_name in kl:
+            return v
+
+    # 4. 兜底：将技能名转换为主题风格的字符串
+    #    "Agent" → "Agent 全流程实战"
+    theme_suffixes = ["全流程实战", "核心组件", "基础", "工程", "入门", "实践"]
+    for suffix in theme_suffixes:
+        candidate = f"{skill_name} {suffix}"
+        if candidate in THEME_TO_SKILL:
+            return candidate
+
+    # 5. 最后的兜底：直接返回技能名作为主题
+    # plan_builder 使用 WEEK_PHASE_MAP.get(theme, 2) 来分配阶段
+    # 只要 theme 不为 None，就能走通
+    return skill_name
+
 # 周计划 → 阶段映射
 WEEK_PHASE_MAP = _content.get("WEEK_PHASE_MAP") or {
     "Python 高级特性": 1, "LangChain 核心组件": 1, "Prompt 工程": 1, "RAG 与向量数据库": 1,

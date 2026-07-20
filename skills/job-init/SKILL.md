@@ -64,6 +64,12 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 >
 > **⑥ 目标城市在哪？现在是什么状态？**
 > 状态选项：在读 / 找实习 / 求职中 / 在职想转。不确定也直说。
+>
+> **⑦ 你习惯什么学习节奏？**
+> - **日常模式**（推荐）: 每天固定学 X 小时，保持节奏感
+> - **周末攻坚**: 周中每天抽 1-2h 轻量学习，周末集中 4-6h 攻坚实践
+> - **灵活模式**: 不排日期，只给任务清单，自己安排时间
+> 直接告诉我就行，不用选数字。
 
 用户回答后，agent 解析提取到以下字段：
 
@@ -75,6 +81,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 | ④ 自驱力 | `self_drive_score`(int), `learning_self_rating`(string) |
 | ⑤ 核心优势 | `strength_tags`(array), `advantage_tags`(array) |
 | ⑥ 城市+状态 | `target_city`/`target_cities`(array), `status`(string) |
+| ⑦ 学习节奏 | `learning_pace`(string) — "daily" / "weekend" / "flexible" |
 
 **解析规则**：
 - `ai_experience_level`：从回答中匹配"零基础/无经验"→"无经验"，"懂概念/基础"→"有AI基础"，"独立做过项目"→"有AI项目经验"，"资深"→"AI领域资深从业者"，"有编程"→"有编程基础但AI零经验"。匹配不到或"不确定"→记空串
@@ -83,6 +90,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 - `self_drive_score`：提取数字 1-5。匹配不到→null。同步 `learning_self_rating`（1→"需要外部强监督"，2→"偶尔需要提醒"，3→"能按计划但有拖延"，4→"自律性强"，5→"极强自驱力"）
 - `strength_tags`：分割逗号/顿号，与预定义标签匹配。未匹配到的归入"其他（自定义）"。同步到 `advantage_tags`
 - `target_cities`：解析城市名，单值同时写 `target_city`
+- `learning_pace`：匹配"日常/每天/均匀"→"daily"，"周末/攻坚/集中"→"weekend"，"灵活/自由/不排"→"flexible"。匹配不到→"daily"
 
 ## Phase 2.5：起点档位判定
 
@@ -110,6 +118,7 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 │  AI 经验      [等级] · [简述]                                 │
 │  每周投入     [X]h → 日均约 [Y]h                              │
 │  坚持周期     [X]                                              │
+│  学习节奏     [日常/周末攻坚/灵活]                              │
 │  自驱力       [X]分 — [描述]                                  │
 │  核心优势     [A、B、C]                                       │
 │  目标城市     [城市]                                          │

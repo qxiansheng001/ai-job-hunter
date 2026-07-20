@@ -1,34 +1,140 @@
 """核心分析引擎：差距分析 + 日历合并 + 内容推荐"""
 
+import json
+
 from analysis.skill_map import (
     SKILL_RESOURCES, SUPPLEMENT_POOL, CONTENT_MAPPING, PROJECT_CONTENT,
     PLATFORM_INFO, PLATFORM_TEMPLATES, MONETIZATION_PATHS, _FILLER_BLOCKS,
-    THEME_TO_SKILL,
+    THEME_TO_SKILL, SKILL_TO_THEME,
 )
 from utils.protocol import emit
 from utils.io import normalize_profile
 from utils.time import (
     _parse_hours_float, _compute_daily_hours, _format_hours_display, _self_drive_label,
+    compute_pace_hours,
 )
+from utils.claude_helper import claude_available, call_claude
 
 
 # ══════════════════════════════════════════════
 # 差距分析
 # ══════════════════════════════════════════════
 
+# Claude 语义技能匹配
+
+_SEMANTIC_SKILL_SYSTEM = """你是一位 AI 求职顾问。分析用户的技能背景与市场岗位需求之间的匹配关系。
+
+对于每个市场需要的技能，判断用户是否掌握、部分掌握或未掌握，并给出个性化的学习起点建议。
+
+返回 JSON 格式。"""
+
+
+def _build_semantic_match_prompt(user_skills, ai_projects, ai_exp_level, market_skills):
+    """构造语义技能匹配 prompt。"""
+    skills_json = json.dumps(
+        [{"skill": s["name"], "mention_rate": s.get("mention_rate", 0),
+          "priority": s.get("priority", "必修")} for s in market_skills],
+        ensure_ascii=False,
+    )
+    return f"""用户技能背景：
+- 技术栈：{json.dumps(user_skills, ensure_ascii=False)}
+- AI 项目经验：{ai_projects or "无"}
+- AI 经验等级：{ai_exp_level}
+
+市场需求技能（含提及率）：
+{skills_json}
+
+请判断用户对每个市场技能的掌握情况。返回 JSON 数组，每个元素：
+{{
+  "skill": "技能名称",
+  "user_has": true/false,        # true=已掌握，false=未掌握
+  "status": "mastered/partial/missing",
+  "start_point": "个性化的学习起点建议，如「有 Python + Flask 基础，类比 Flask 路由理解 Chain 概念」",
+  "reason": "一句简短理由"
+}}
+
+注意：如果用户有相关可迁移技能（如会 Flask → 易于学 LangChain），请在 start_point 中体现。"""
+
+
+def _semantic_skill_match(user_skills, ai_projects, ai_exp_level, market_skills):
+    """调用 Claude 进行语义技能匹配。
+
+    返回 dict: {skill_name: {"user_has": bool, "status": str, "start_point": str}}
+    或 None（调用失败时）。
+    """
+    if not market_skills:
+        return None
+
+    prompt = _build_semantic_match_prompt(user_skills, ai_projects, ai_exp_level, market_skills)
+
+    result = call_claude(
+        system_prompt=_SEMANTIC_SKILL_SYSTEM,
+        user_prompt=prompt,
+        response_schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "skill": {"type": "string"},
+                    "user_has": {"type": "boolean"},
+                    "status": {"type": "string", "enum": ["mastered", "partial", "missing"]},
+                    "start_point": {"type": "string"},
+                    "reason": {"type": "string"},
+                },
+                "required": ["skill", "user_has", "status", "start_point"],
+            },
+        },
+    )
+
+    if result is None:
+        return None
+
+    return {item["skill"]: item for item in result}
+
+
 def analyze_gap(profile_data, report_data, duration=90):
     """市场驱动型差距分析：60% 市场 + 30% 画像 + 10% 补充"""
     profile = normalize_profile(profile_data)
-    user_skills = [s.lower() for s in profile.get("tech_stack", [])]
+    user_skills_raw = [s.lower() for s in profile.get("tech_stack", [])]
     ai_projects = (profile.get("ai_projects") or "").lower()
     strength_tags = profile.get("strength_tags", []) or profile.get("advantage_tags", [])
     ai_exp_level = profile.get("ai_experience_level", "")
+
+    # ── 语义技能匹配（可用时）──
+    semantic_result = None
+    if claude_available():
+        all_market_skills_raw = []
+        seen = set()
+        for skill_name, mention_rate in report_data.get("essential_skills", []):
+            if skill_name.lower() not in seen:
+                all_market_skills_raw.append({"name": skill_name, "mention_rate": mention_rate, "priority": "核心必修"})
+                seen.add(skill_name.lower())
+        for skill_name, mention_rate in report_data.get("bonus_skills", []):
+            if skill_name.lower() not in seen:
+                all_market_skills_raw.append({"name": skill_name, "mention_rate": mention_rate, "priority": "加分必修"})
+                seen.add(skill_name.lower())
+        if all_market_skills_raw:
+            semantic_result = _semantic_skill_match(
+                profile.get("tech_stack", []),
+                profile.get("ai_projects", ""),
+                ai_exp_level,
+                all_market_skills_raw,
+            )
 
     def _user_has_skill(key):
         """模糊匹配：user_skills 中任一技能包含 key 或被 key 包含"""
         if not key:
             return False
-        return any(key in us or us in key for us in user_skills) or key in ai_projects
+        # 语义结果优先
+        if semantic_result and key in semantic_result:
+            return semantic_result[key].get("user_has", False)
+        return any(key in us or us in key for us in user_skills_raw) or key in ai_projects
+
+    def _get_start_point(key):
+        """获取语义起点建议（仅 Claude 模式有）。"""
+        if semantic_result and key in semantic_result:
+            return semantic_result[key].get("start_point", "")
+        return ""
 
     report_top_skill_names = [s for s, _ in report_data.get("top_skills", [])]
     essential = report_data.get("essential_skills", []) or []
@@ -42,20 +148,28 @@ def analyze_gap(profile_data, report_data, duration=90):
         key = skill_name.lower()
         if key not in seen:
             user_has = _user_has_skill(key)
-            market_skills.append({
+            start_pt = _get_start_point(key)
+            entry = {
                 "name": skill_name, "mention_rate": mention_rate,
                 "source": "essential", "priority": "核心必修", "user_has": user_has,
-            })
+            }
+            if start_pt:
+                entry["start_point"] = start_pt
+            market_skills.append(entry)
             seen.add(key)
 
     for skill_name, mention_rate in bonus:
         key = skill_name.lower()
         if key not in seen:
             user_has = _user_has_skill(key)
-            market_skills.append({
+            start_pt = _get_start_point(key)
+            entry = {
                 "name": skill_name, "mention_rate": mention_rate,
                 "source": "bonus", "priority": "加分必修", "user_has": user_has,
-            })
+            }
+            if start_pt:
+                entry["start_point"] = start_pt
+            market_skills.append(entry)
             seen.add(key)
 
     # STEP 2: User profile adjustment (30% weight)
@@ -77,6 +191,10 @@ def analyze_gap(profile_data, report_data, duration=90):
         hours_tier = "饱满"
     else:
         hours_tier = "标准"
+
+    # 学习节奏模式
+    pace_raw = profile.get("learning_pace", "daily")
+    learning_pace = compute_pace_hours(pace_raw, wh)
 
     sd_score = profile.get("self_drive_score", 3)
     sd_label, sd_flag = _self_drive_label(sd_score)
@@ -115,14 +233,25 @@ def analyze_gap(profile_data, report_data, duration=90):
 
     for skill, info in SKILL_RESOURCES.items():
         skill_lower = skill.lower()
-        user_has = skill_lower in user_skills or skill_lower in ai_projects
+        # 语义匹配优先
+        if semantic_result and skill in semantic_result:
+            user_has = semantic_result[skill].get("user_has", False)
+            semantic_status = semantic_result[skill].get("status", "missing")
+            semantic_start = semantic_result[skill].get("start_point", "")
+        else:
+            user_has = skill_lower in user_skills_raw or skill_lower in ai_projects
+            semantic_status = "mastered" if user_has else "missing"
+            semantic_start = ""
+
         if user_has:
             has_skills.append(skill)
         else:
             market_need = any(skill_lower in s for s in report_top_skill_names)
             if market_need or info["priority"] in ("必修", "核心"):
                 missing_skills.append(skill)
-                if ai_exp_level in ("有AI项目经验", "AI领域资深从业者"):
+                if semantic_start:
+                    sp = semantic_start
+                elif ai_exp_level in ("有AI项目经验", "AI领域资深从业者"):
                     sp = "有基础，建议快速浏览"
                 elif ai_exp_level in ("有AI基础",):
                     sp = "了解概念，需系统学习"
@@ -161,6 +290,7 @@ def analyze_gap(profile_data, report_data, duration=90):
         "supplement_explanations": supp_explanations,
         "supplement_hours_total": supp_hours_total,
         "total_available_hours": total_available_hours,
+        "learning_pace": learning_pace,
     }
 
 

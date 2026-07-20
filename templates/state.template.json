@@ -26,6 +26,7 @@
     "self_drive_score": null,
     "strength_tags": [],
     "advantage_tags": [],
+    "learning_pace": "daily",
     "preferred_platforms": [],
     "region": "",
     "target_city": "",

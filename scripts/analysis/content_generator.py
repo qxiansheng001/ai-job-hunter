@@ -1,6 +1,9 @@
 """学习计划内容生成器：基于用户画像和主题映射输出个性化结构化内容。"""
 
+import json
+
 from analysis.content_loader import get_content_pack
+from utils.claude_helper import claude_available, call_claude
 
 
 # ── 深度 → 学习量映射 ──
@@ -10,6 +13,103 @@ DEPTH_CONFIG = {
     "L2": {"label": "核心掌握", "item_count": (2, 4), "total_hours": (3, 5)},
     "L1": {"label": "概念了解", "item_count": (1, 2), "total_hours": (1, 2)},
 }
+
+
+# ── Claude 个性化内容生成 ──
+
+_CLAUDE_CONTENT_SYSTEM = """你是一位 AI 学习导师。根据用户背景和市场需求，为每个技能生成个性化学习条目。
+
+要求：
+1. 每个条目包含：标题、大白话类比（费曼提示）、实践任务、预计时长
+2. 深度级别 L1=概念了解(1-2h), L2=核心掌握(3-5h), L3=深入掌握(6-8h)
+3. 利用用户已有技能做类比，不要从零开始讲
+4. 内容必须贴合实际技术，不能泛泛而谈
+5. 返回 JSON。"""
+
+
+def _build_content_prompt(skills_with_depth, profile):
+    """构造内容生成 prompt。"""
+    tech_stack = profile.get("tech_stack", [])
+    ai_exp = profile.get("ai_experience_level", "无经验")
+    ai_projects = profile.get("ai_projects", "")
+    strength_tags = profile.get("strength_tags", []) or profile.get("advantage_tags", [])
+
+    skills_json = json.dumps(skills_with_depth, ensure_ascii=False, indent=2)
+
+    return f"""用户画像：
+- 技术栈：{json.dumps(tech_stack, ensure_ascii=True)}
+- AI 经验等级：{ai_exp}
+- AI 项目经验：{ai_projects or "无"}
+- 核心优势标签：{json.dumps(strength_tags, ensure_ascii=True)}
+
+需要学习以下技能（含深度要求）：
+{skills_json}
+
+请为每个技能生成 2-4 个学习条目。返回 JSON 数组：
+
+```json
+[
+  {{
+    "theme": "技能主题（与输入 theme 字段一致）",
+    "goal": "这个技能的学习目标（一句话）",
+    "items": [
+      {{
+        "title": "学习条目标题",
+        "feynman_hint": "大白话解释或类比",
+        "practice_task": "具体实践任务",
+        "base_hours": 预计小时数（浮点数）
+      }}
+    ]
+  }}
+]
+```
+
+个性化规则（必须遵守）：
+1. 用户已有技能必须在类比和起点中被利用（如会 Flask → LangChain 类比 Flask 路由）
+2. AI 经验低 → 从基础概念讲起，多用类比
+3. AI 经验高 → 直接深入原理和最佳实践
+4. L1 深度 → 1-2 条概念性条目，每个 1-2h
+5. L2 深度 → 2-3 条含实践，每个 2-3h
+6. L3 深度 → 3-4 条含深度实践，每个 2-3h"""
+
+
+def _generate_with_claude(skills_with_depth, profile):
+    """调用 Claude 生成个性化学习内容。"""
+    prompt = _build_content_prompt(skills_with_depth, profile)
+
+    result = call_claude(
+        system_prompt=_CLAUDE_CONTENT_SYSTEM,
+        user_prompt=prompt,
+        response_schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "theme": {"type": "string"},
+                    "goal": {"type": "string"},
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {"type": "string"},
+                                "feynman_hint": {"type": "string"},
+                                "practice_task": {"type": "string"},
+                                "base_hours": {"type": "number"},
+                            },
+                            "required": ["title", "feynman_hint", "practice_task", "base_hours"],
+                        },
+                    },
+                },
+                "required": ["theme", "goal", "items"],
+            },
+        },
+    )
+
+    if result is None:
+        return None
+
+    return {"themes": result}
 
 
 # ═══════════════════════════════════════════════
@@ -34,6 +134,13 @@ def generate_plan_content(skills_with_depth, profile):
     profile: 用户画像字典
     返回: {"themes": [{"theme": ..., "goal": ..., "items": [...]}]}
     """
+    # 当 Claude 可用时使用语义生成
+    if claude_available():
+        claude_result = _generate_with_claude(skills_with_depth, profile)
+        if claude_result is not None:
+            return claude_result
+
+    # 回退：使用 YAML 内容池
     return _generate_outline_v2(skills_with_depth, profile)
 
 

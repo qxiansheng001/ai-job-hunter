@@ -50,7 +50,8 @@ test -f "$DATA_DIR/.skill-state.json" && echo EXISTS || echo MISSING
 ```bash
 python "$SKILL_DIR/scripts/analysis/jd_analyzer.py" \
   --input {clean_file} \
-  --title "{keyword}"
+  --title "{keyword}" \
+  --use-claude
 ```
 
 其中 `{clean_file}` 和 `{keyword}` 从 `$DATA_DIR/.skill-state.json` 的 `job_search` 读取。
@@ -162,6 +163,8 @@ print(f'目标岗位: {d[\"title\"]}')
 print(f'数据来源: BOSS直聘 ({d[\"total_jobs\"]}个岗位样本)')
 print(f'学习周期: {d[\"duration\"]}天 | 每周投入: {d[\"weekly_hours\"]} | 强度: {d[\"intensity\"]}')
 print(f'AI经验等级: {d[\"ai_experience_level\"]} → 起点: {d[\"start_point\"]}')
+	lp = d.get('learning_pace', '日常模式')
+	print(f'学习节奏: {lp}')
 ed = d.get('self_drive_score', '?')
 print(f'自驱力: {ed}/5 → 监督: {d[\"supervision\"]}')
 strengths = '、'.join(d['core_strengths']) if d.get('core_strengths') else '无'
