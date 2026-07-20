@@ -6,6 +6,9 @@
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue?logo=python" alt="Python 3.10+"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
     <a href="https://claude.ai/claude-code"><img src="https://img.shields.io/badge/Claude_Code-Skill-purple" alt="Claude Code Skill"></a>
+    <a href=".github/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/qxiansheng001/ai-job-hunter/test.yml?label=test" alt="Test Status"></a>
+    <a href="https://github.com/qxiansheng001/ai-job-hunter/commits/main"><img src="https://img.shields.io/github/last-commit/qxiansheng001/ai-job-hunter" alt="Last Commit"></a>
+    <a href="https://github.com/qxiansheng001/ai-job-hunter/stargazers"><img src="https://img.shields.io/github/stars/qxiansheng001/ai-job-hunter?style=social" alt="Stars"></a>
   </p>
 </div>
 
