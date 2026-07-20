@@ -1,0 +1,27 @@
+- name: bug
+  description: 报告程序错误
+  color: d73a4a
+- name: enhancement
+  description: 新功能或改进建议
+  color: a2eeef
+- name: documentation
+  description: 文档相关
+  color: 0075ca
+- name: question
+  description: 问题或讨论
+  color: d876e3
+- name: good first issue
+  description: 适合新贡献者
+  color: 7057ff
+- name: help wanted
+  description: 需要帮助
+  color: 008672
+- name: wontfix
+  description: 不计划修复
+  color: ffffff
+- name: duplicate
+  description: 重复的 Issue
+  color: cfd3d7
+- name: invalid
+  description: 无效
+  color: e4e669

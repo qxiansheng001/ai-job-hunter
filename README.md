@@ -9,6 +9,7 @@
     <a href=".github/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/qxiansheng001/ai-job-hunter/test.yml?label=test" alt="Test Status"></a>
     <a href="https://github.com/qxiansheng001/ai-job-hunter/commits/main"><img src="https://img.shields.io/github/last-commit/qxiansheng001/ai-job-hunter" alt="Last Commit"></a>
     <a href="https://github.com/qxiansheng001/ai-job-hunter/stargazers"><img src="https://img.shields.io/github/stars/qxiansheng001/ai-job-hunter?style=social" alt="Stars"></a>
+    <a href="https://codecov.io/gh/qxiansheng001/ai-job-hunter"><img src="https://img.shields.io/codecov/c/github/qxiansheng001/ai-job-hunter" alt="Coverage"></a>
   </p>
 </div>
 
@@ -263,11 +264,12 @@ ai-job-hunter/
 
 ## 贡献
 
-欢迎提 Issue 和 PR。
+欢迎提 Issue 和 PR。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 1. Fork → Branch → PR
 2. 新增功能请附带测试
 3. 运行 `python -m pytest scripts/tests/` 确保通过
+4. 提交前运行 `pre-commit run --all-files` 格式化代码
 
 ---
 
